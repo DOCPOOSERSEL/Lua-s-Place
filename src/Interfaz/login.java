@@ -3,7 +3,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 
-public class Login {
+public class login {
     private String usuario;
     private String contrasena;
 
@@ -22,7 +22,7 @@ public class Login {
         JTextField txtUsuario = new JTextField();
         JPasswordField txtContrasena = new JPasswordField();
 
-        panelCampos.add(new JLabel("Usuario:"));
+        panelCampos.add(new JLabel("Id:"));
         panelCampos.add(txtUsuario);
         panelCampos.add(new JLabel("Contraseña:"));
         panelCampos.add(txtContrasena);

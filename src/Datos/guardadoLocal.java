@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class guardadoLocal {
+    // Este solo es para guardar cosas que se nececiten guardar en local como un agregar los clientes o asi o borrados para recuperarlos
+    // Informacion que no importa que este en la computadora para facilitar los querys
+
     private static List<proveedor> proveedores = new ArrayList<>();
     private static List<cliente> clientes = new ArrayList<>();
     private static List<empleado> empleados = new ArrayList<>();
