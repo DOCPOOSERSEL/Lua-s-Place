@@ -3,9 +3,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.Connection;
 
 public class paginaPrincipal extends JFrame{
-    public void MenuPrincipal() {
+    public void MenuPrincipal(Connection conn) {
         setTitle("Luas Place - Menú Principal");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(400, 300);
@@ -27,13 +28,16 @@ public class paginaPrincipal extends JFrame{
         gbc.gridy = 0;
         panel.add(titulo, gbc);
 
+
         // Botón CRUD Clientes
         JButton btnClientes = new JButton("CRUD Clientes");
         btnClientes.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         btnClientes.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-
+                crudUsuarioInterfaz crud = new crudUsuarioInterfaz();
+                crud.crudEmpleadosInterfaz(conn);
+                crud.setVisible(true);
             }
         });
         gbc.gridy = 1;

@@ -18,7 +18,7 @@ public class Main {
         }
         if (inicioDeSesion.verificarContraseña(Integer.parseInt(miUsuario), miContrasena, conn)){
             paginaPrincipal pagina = new paginaPrincipal();
-            pagina.MenuPrincipal();
+            pagina.MenuPrincipal(conn);
             pagina.setVisible(true);
 
         }else {
