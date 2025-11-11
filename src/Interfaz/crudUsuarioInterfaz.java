@@ -175,6 +175,9 @@ public class crudUsuarioInterfaz extends JFrame {
         panelSuperior.add(new JLabel("ID Empleado a Actualizar:"));
         txtIdActualizar = new JTextField(10);
         panelSuperior.add(txtIdActualizar);
+
+        JButton btnBuscar = new JButton("Buscar");
+        panelSuperior.add(btnBuscar);
         panel.add(panelSuperior, BorderLayout.NORTH);
 
         JPanel panelDatos = new JPanel(new GridLayout(10, 2, 5, 5));
@@ -218,6 +221,12 @@ public class crudUsuarioInterfaz extends JFrame {
         panel.add(btnActualizar, BorderLayout.SOUTH);
 
         crudUsuario acciones = new crudUsuario(this);
+
+        btnBuscar.addActionListener(e -> {
+            asignarCamposActualizar();
+            acciones.buscarUsuario(conn);
+        });
+
         btnActualizar.addActionListener(e -> {
             asignarCamposActualizar();
             acciones.actualizarUsuario(conn);
@@ -225,6 +234,7 @@ public class crudUsuarioInterfaz extends JFrame {
 
         return panel;
     }
+
 
     //Da lugar a los campos q estan estaticos para que las pestañas no se pasen informacion y los metodos tomen de las
     // mismos campos de texto ya matenmeeeeeeeeeeeeeeeeeeeeeeee
