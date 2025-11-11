@@ -3,6 +3,7 @@ package Funciones;
 import Interfaz.crudUsuarioInterfaz;
 import javax.swing.*;
 import java.sql.*;
+import java.util.ArrayList;
 
 public class crudUsuario {
     private crudUsuarioInterfaz vista;
@@ -108,4 +109,46 @@ public class crudUsuario {
             JOptionPane.showMessageDialog(null, "Error al eliminar: " + e.getMessage());
         }
     }
+
+    //Esto para obtener los permisos de los usuarios y guardarlos para modifiacr
+    public ArrayList<Object[]> obtenerPermisosUsuarios(Connection conn) {
+        ArrayList<Object[]> lista = new ArrayList<>();
+        String sql = """
+        SELECT e.id_emp, e.nombre_emp, e.apellidop_emp, e.apellidom_emp, 
+               p.admin_pemp, p.manager_pemp
+        FROM empleado e
+        INNER JOIN permiso_emp p ON e.id_emp = p.id_emp
+        ORDER BY e.id_emp;
+    """;
+        try (Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                lista.add(new Object[]{
+                        rs.getInt("id_emp"),
+                        rs.getString("nombre_emp") + " " +
+                                rs.getString("apellidop_emp") + " " +
+                                rs.getString("apellidom_emp"),
+                        rs.getBoolean("admin_pemp"),
+                        rs.getBoolean("manager_pemp")
+                });
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Error al obtener permisos: " + e.getMessage());
+        }
+        return lista;
+    }
+
+    public void actualizarPermisos(Connection conn, int idEmp, boolean admin, boolean manager) {
+        String sql = "UPDATE permiso_emp SET admin_pemp = ?, manager_pemp = ? WHERE id_emp = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setBoolean(1, admin);
+            ps.setBoolean(2, manager);
+            ps.setInt(3, idEmp);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Error al actualizar permisos: " + e.getMessage());
+        }
+    }
+
+
 }

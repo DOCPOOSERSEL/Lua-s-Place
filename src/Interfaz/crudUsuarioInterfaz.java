@@ -3,6 +3,7 @@ package Interfaz;
 import Funciones.crudUsuario;
 import java.sql.*;
 import java.awt.*;
+import java.util.ArrayList;
 import javax.swing.*;
 
 public class crudUsuarioInterfaz extends JFrame {
@@ -10,7 +11,7 @@ public class crudUsuarioInterfaz extends JFrame {
     public JTextField txtId, txtNombre, txtApP, txtApM, txtCP, txtRFC, txtCalle, txtColonia, txtFechaNac, txtFechaContrato;
     public JPasswordField txtContra;
 
-    // Campos propios de cada pestaña
+    // Campos propios de cada sub pestaña
     private JTextField txtIdBuscar, txtIdActualizar;
     private JPasswordField txtContraBuscar, txtContraAgregar, txtContraActualizar;
     private JTextField txtNombreBuscar, txtNombreAgregar, txtNombreActualizar;
@@ -34,6 +35,7 @@ public class crudUsuarioInterfaz extends JFrame {
         pestañas.add("Buscar / Eliminar", crearPanelBuscar(conn));
         pestañas.add("Agregar", crearPanelAgregar(conn));
         pestañas.add("Actualizar", crearPanelActualizar(conn));
+        pestañas.add("Permisos",crearPanelPermisos(conn));
 
         add(pestañas, BorderLayout.CENTER);
     }
@@ -235,6 +237,65 @@ public class crudUsuarioInterfaz extends JFrame {
         return panel;
     }
 
+    private JPanel crearPanelPermisos(Connection conn) {
+        crudUsuario acciones = new crudUsuario(this);
+
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBorder(BorderFactory.createTitledBorder("Gestión de Permisos"));
+
+        // Panel para los usuarios
+        JPanel panelLista = new JPanel(new GridLayout(0, 1, 5, 5));
+        JScrollPane scroll = new JScrollPane(panelLista);
+        panel.add(scroll, BorderLayout.CENTER);
+
+        // Obtenemos la lista de los usuarios
+        // Array secundario para la actualizacion
+        ArrayList<Object[]> listaUsuarios = acciones.obtenerPermisosUsuarios(conn);
+        ArrayList<JCheckBox[]> listaChecks = new ArrayList<>();
+
+        for (Object[] usuario : listaUsuarios) {
+            int idEmp = (int) usuario[0];
+            String nombreEmp = (String) usuario[1];
+            boolean admin = (boolean) usuario[2];
+            boolean manager = (boolean) usuario[3];
+
+            JPanel fila = new JPanel(new FlowLayout(FlowLayout.LEFT));
+            fila.setBorder(BorderFactory.createEtchedBorder());
+            fila.add(new JLabel("ID: " + idEmp + " | " + nombreEmp));
+
+            JCheckBox checarAdm = new JCheckBox("Admin", admin);
+            JCheckBox checarMnj = new JCheckBox("Manager", manager);
+
+            fila.add(checarAdm);
+            fila.add(checarMnj);
+
+            listaChecks.add(new JCheckBox[]{checarAdm, checarMnj});
+
+            // ID del empleado en el panel
+            fila.putClientProperty("id_emp", idEmp);
+            panelLista.add(fila);
+        }
+
+
+        JButton btnGuardar = new JButton("Guardar Cambios");
+        btnGuardar.addActionListener(e -> {
+            Component[] filas = panelLista.getComponents();
+            for (Component comp : filas) {
+                if (comp instanceof JPanel fila) {
+                    int id = (int) fila.getClientProperty("id_emp");
+                    JCheckBox chkAdmin = (JCheckBox) ((JPanel) fila).getComponent(1);
+                    JCheckBox chkManager = (JCheckBox) ((JPanel) fila).getComponent(2);
+                    acciones.actualizarPermisos(conn, id, chkAdmin.isSelected(), chkManager.isSelected());
+                }
+            }
+            JOptionPane.showMessageDialog(panel, "Permisos actualizados correctamente.");
+        });
+        panel.add(btnGuardar, BorderLayout.SOUTH);
+
+        return panel;
+    }
+
+
 
     //Da lugar a los campos q estan estaticos para que las pestañas no se pasen informacion y los metodos tomen de las
     // mismos campos de texto ya matenmeeeeeeeeeeeeeeeeeeeeeeee
@@ -280,5 +341,5 @@ public class crudUsuarioInterfaz extends JFrame {
     }
 }
 
-//Llevo semanas haciendo namas este pedasoooooooa sdohasfoihasfihasfas
+//Llevo dias haciendo namas este pedasoooooooa sdohasfoihasfihasfas
 //Agregar botones paa buscar por ciudad o asi q ya namas llame a unas funciones que cambien pero ya me canseeeeeeefirijoperiojaejioñ
