@@ -25,6 +25,12 @@ public class crudUsuarioInterfaz extends JFrame {
     private JTextField txtColoniaBuscar, txtColoniaAgregar, txtColoniaActualizar;
     public JComboBox<String> comboRolAgregar;
     public String rolSeleccionado;
+    private int idUsuarioEnSesion;
+
+    public crudUsuarioInterfaz(int idUsuario) {
+        this.idUsuarioEnSesion = idUsuario;
+    }
+
 
     public void setRolSeleccionado(String rol) {
         this.rolSeleccionado = rol;
@@ -36,9 +42,6 @@ public class crudUsuarioInterfaz extends JFrame {
 
     public crudUsuarioInterfaz() {
 
-        // ==============================
-        // ESTILO CAFÉ (NO ROMPE NADA)
-        // ==============================
         UIManager.put("TabbedPane.selected", new Color(130, 80, 50));
         UIManager.put("TabbedPane.contentAreaColor", new Color(240, 225, 210));
         UIManager.put("TabbedPane.focus", new Color(150, 100, 70));
@@ -71,9 +74,7 @@ public class crudUsuarioInterfaz extends JFrame {
         // Fondo general
         getContentPane().setBackground(new Color(245, 235, 220));
 
-        // ===============================
-        // PESTAÑAS A LA IZQUIERDA
-        // ===============================
+
         JTabbedPane pestañas = new JTabbedPane(JTabbedPane.LEFT);
         pestañas.setBackground(new Color(220, 200, 180));
         pestañas.setForeground(Color.BLACK);
@@ -104,6 +105,49 @@ public class crudUsuarioInterfaz extends JFrame {
 
         JPanel panelDatos = new JPanel(new GridLayout(10, 2, 5, 5));
         panelDatos.setBorder(BorderFactory.createTitledBorder("Información del Empleado"));
+
+        panel.setBackground(new Color(245, 235, 220)); // Café claro
+        panelSuperior.setBackground(new Color(240, 225, 205));
+        panelDatos.setBackground(new Color(255, 245, 230));
+
+        panelDatos.setBorder(BorderFactory.createTitledBorder(
+                BorderFactory.createLineBorder(new Color(150, 110, 80), 2, true),
+                "Información del Empleado",
+                0, 0,
+                new Font("Segoe UI", Font.BOLD, 14),
+                new Color(90, 55, 30)
+        ));
+
+        for (Component comp : panelDatos.getComponents()) {
+            if (comp instanceof JLabel) {
+                comp.setForeground(new Color(90, 55, 30));
+            }
+            if (comp instanceof JTextField || comp instanceof JPasswordField) {
+                comp.setBackground(new Color(255, 250, 240));
+                comp.setForeground(new Color(60, 40, 20));
+            }
+        }
+
+        // Estilo café para botones Buscar / Eliminar
+        JButton[] botonesBuscarEliminar = {btnBuscar, btnEliminar};
+        for (JButton btn : botonesBuscarEliminar) {
+            btn.setFont(new Font("Segoe UI", Font.BOLD, 14));
+            btn.setForeground(Color.WHITE);
+            btn.setBackground(new Color(110, 70, 40));
+            btn.setFocusPainted(false);
+            btn.setBorder(BorderFactory.createEmptyBorder(8, 15, 8, 15));
+
+            btn.addMouseListener(new java.awt.event.MouseAdapter() {
+                public void mouseEntered(java.awt.event.MouseEvent evt) {
+                    btn.setBackground(new Color(140, 90, 55));
+                }
+                public void mouseExited(java.awt.event.MouseEvent evt) {
+                    btn.setBackground(new Color(110, 70, 40));
+                }
+            });
+        }
+
+
 
         txtContraBuscar = new JPasswordField();
         txtNombreBuscar = new JTextField();
@@ -158,7 +202,7 @@ public class crudUsuarioInterfaz extends JFrame {
         });
         btnEliminar.addActionListener(e -> {
             asignarCamposBusqueda();
-            acciones.eliminarUsuario(conn);
+            acciones.eliminarUsuario(conn, idUsuarioEnSesion);
         });
 
         return panel;
@@ -169,6 +213,25 @@ public class crudUsuarioInterfaz extends JFrame {
         JPanel panel = new JPanel(new BorderLayout());
         JPanel panelDatos = new JPanel(new GridLayout(11, 2, 5, 5));
         panelDatos.setBorder(BorderFactory.createTitledBorder("Nuevo Empleado"));
+
+        panel.setBackground(new Color(245, 235, 220));
+        panelDatos.setBackground(new Color(255, 245, 230));
+
+        panelDatos.setBorder(BorderFactory.createTitledBorder(
+                BorderFactory.createLineBorder(new Color(150, 110, 80), 2, true),
+                "Nuevo Empleado",
+                0, 0,
+                new Font("Segoe UI", Font.BOLD, 14),
+                new Color(90, 55, 30)
+        ));
+
+        for (Component comp : panelDatos.getComponents()) {
+            if (comp instanceof JLabel)
+                comp.setForeground(new Color(90, 55, 30));
+
+            if (comp instanceof JTextField || comp instanceof JPasswordField || comp instanceof JComboBox)
+                comp.setBackground(new Color(255, 250, 240));
+        }
 
         txtContraAgregar = new JPasswordField();
         txtNombreAgregar = new JTextField();
@@ -181,14 +244,12 @@ public class crudUsuarioInterfaz extends JFrame {
         txtCalleAgregar = new JTextField();
         txtColoniaAgregar = new JTextField();
 
-        // NUEVO: ComboBox de roles
         comboRolAgregar = new JComboBox<>(new String[] {
                 "Empleado",
                 "Cajero",
                 "Manager"
         });
 
-        // CAMPOS IGUAL QUE LA VERSIÓN VIEJA
         panelDatos.add(new JLabel("Contraseña:"));
         panelDatos.add(txtContraAgregar);
         panelDatos.add(new JLabel("Nombre:"));
@@ -210,7 +271,6 @@ public class crudUsuarioInterfaz extends JFrame {
         panelDatos.add(new JLabel("Colonia:"));
         panelDatos.add(txtColoniaAgregar);
 
-        // NUEVO: CAMPO DE ROL
         panelDatos.add(new JLabel("Rol del Empleado:"));
         panelDatos.add(comboRolAgregar);
 
@@ -219,12 +279,27 @@ public class crudUsuarioInterfaz extends JFrame {
         JButton btnAgregar = new JButton("Agregar Empleado");
         panel.add(btnAgregar, BorderLayout.SOUTH);
 
-        crudUsuario acciones = new crudUsuario(this);
+        btnAgregar.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        btnAgregar.setForeground(Color.WHITE);
+        btnAgregar.setBackground(new Color(110, 70, 40));
+        btnAgregar.setFocusPainted(false);
+        btnAgregar.setBorder(BorderFactory.createEmptyBorder(8,15,8,15));
+
+        btnAgregar.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                btnAgregar.setBackground(new Color(140, 90, 55));
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                btnAgregar.setBackground(new Color(110, 70, 40));
+            }
+        });
+
+        crudUsuario funcionUsuario = new crudUsuario(this);
 
         btnAgregar.addActionListener(e -> {
             asignarCamposAgregar();
             setRolSeleccionado(comboRolAgregar.getSelectedItem().toString());
-            acciones.agregarUsuario(conn);
+            funcionUsuario.agregarUsuario(conn);
         });
         return panel;
     }
@@ -238,12 +313,50 @@ public class crudUsuarioInterfaz extends JFrame {
         txtIdActualizar = new JTextField(10);
         panelSuperior.add(txtIdActualizar);
 
+
+
         JButton btnBuscar = new JButton("Buscar");
         panelSuperior.add(btnBuscar);
         panel.add(panelSuperior, BorderLayout.NORTH);
 
         JPanel panelDatos = new JPanel(new GridLayout(10, 2, 5, 5));
         panelDatos.setBorder(BorderFactory.createTitledBorder("Actualizar Información"));
+
+        panel.setBackground(new Color(245, 235, 220));
+        panelSuperior.setBackground(new Color(240, 225, 205));
+        panelDatos.setBackground(new Color(255, 245, 230));
+
+        panelDatos.setBorder(BorderFactory.createTitledBorder(
+                BorderFactory.createLineBorder(new Color(150, 110, 80), 2, true),
+                "Actualizar Información",
+                0, 0,
+                new Font("Segoe UI", Font.BOLD, 14),
+                new Color(90, 55, 30)
+        ));
+
+        for (Component comp : panelDatos.getComponents()) {
+            if (comp instanceof JLabel)
+                comp.setForeground(new Color(90, 55, 30));
+
+            if (comp instanceof JTextField || comp instanceof JPasswordField)
+                comp.setBackground(new Color(255, 250, 240));
+        }
+
+        btnBuscar.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        btnBuscar.setForeground(Color.WHITE);
+        btnBuscar.setBackground(new Color(110, 70, 40));
+        btnBuscar.setFocusPainted(false);
+        btnBuscar.setBorder(BorderFactory.createEmptyBorder(8, 15, 8, 15));
+
+        btnBuscar.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                btnBuscar.setBackground(new Color(140, 90, 55));
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                btnBuscar.setBackground(new Color(110, 70, 40));
+            }
+        });
+
 
         txtContraActualizar = new JPasswordField();
         txtNombreActualizar = new JTextField();
@@ -282,6 +395,22 @@ public class crudUsuarioInterfaz extends JFrame {
         JButton btnActualizar = new JButton("Actualizar Empleado");
         panel.add(btnActualizar, BorderLayout.SOUTH);
 
+        btnActualizar.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        btnActualizar.setForeground(Color.WHITE);
+        btnActualizar.setBackground(new Color(110, 70, 40));
+        btnActualizar.setFocusPainted(false);
+        btnActualizar.setBorder(BorderFactory.createEmptyBorder(8,15,8,15));
+
+        btnActualizar.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                btnActualizar.setBackground(new Color(140, 90, 55));
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                btnActualizar.setBackground(new Color(110, 70, 40));
+            }
+        });
+
+
         crudUsuario acciones = new crudUsuario(this);
 
         btnBuscar.addActionListener(e -> {
@@ -291,7 +420,7 @@ public class crudUsuarioInterfaz extends JFrame {
 
         btnActualizar.addActionListener(e -> {
             asignarCamposActualizar();
-            acciones.actualizarUsuario(conn);
+            acciones.actualizarUsuario(conn, idUsuarioEnSesion);
         });
 
         return panel;

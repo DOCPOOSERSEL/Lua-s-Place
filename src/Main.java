@@ -1,4 +1,5 @@
 import Datos.accesoBaseDeDatos;
+import Funciones.controlSesiones;
 import Interfaz.login;
 import Funciones.inicioDeSesion;
 import Interfaz.errorDeUsuario;
@@ -16,12 +17,14 @@ public class Main {
             miUsuario = loginUsuario.getUsuario();
             miContrasena = loginUsuario.getContrasena();
         }
-        if (inicioDeSesion.verificarContraseña(Integer.parseInt(miUsuario), miContrasena, conn)){
+
+        if (inicioDeSesion.verificarContraseña(Integer.parseInt(miUsuario), miContrasena, conn)) {
             paginaPrincipal pagina = new paginaPrincipal();
+            controlSesiones.registrarSesion(Integer.parseInt(miUsuario), conn);
             pagina.MenuPrincipal(conn, Integer.parseInt(miUsuario));
             pagina.setVisible(true);
 
-        }else {
+        } else {
             errorDeUsuario error = new errorDeUsuario();
             error.errorLogin();
             error.setVisible(true);

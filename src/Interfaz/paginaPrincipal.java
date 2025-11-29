@@ -31,7 +31,7 @@ public class paginaPrincipal extends JFrame {
         pestañas.setForeground(new Color(70, 40, 20));     // Texto café oscuro
 
         // CRUD Usuarios
-        crudUsuarioInterfaz crud = new crudUsuarioInterfaz();
+        crudUsuarioInterfaz crud = new crudUsuarioInterfaz(idUsuario);
         crud.crudEmpleadosInterfaz(conn);
 
         JPanel panelCrud = new JPanel(new BorderLayout());
@@ -58,10 +58,13 @@ public class paginaPrincipal extends JFrame {
         pestañas.addTab("Inventario", panelInv);
 
         // === Panel Registros ===
+        // === Panel Registros ===
+        controlSesionInterfaz panelSesiones = new controlSesionInterfaz(conn);
         JPanel panelReg = new JPanel(new BorderLayout());
         panelReg.setBackground(new Color(245, 230, 210));
-        panelReg.add(new JLabel("Registros del sistema (Log)", SwingConstants.CENTER));
+        panelReg.add(panelSesiones, BorderLayout.CENTER);
         pestañas.addTab("Registros", panelReg);
+
 
         add(pestañas, BorderLayout.CENTER);
     }

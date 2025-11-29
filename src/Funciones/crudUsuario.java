@@ -41,16 +41,20 @@ public class crudUsuario {
 
     public void agregarUsuario(Connection conn) {
         try {
+            // Cifrar la contraseña antes de insertarla
+            String contraseñaPlano = new String(vista.txtContra.getPassword());
+            String contraseñaCifrada = inicioDeSesion.cifrar(contraseñaPlano);
+
             String sqlEmpleado = """
-            INSERT INTO empleado 
-            (contra_emp, nombre_emp, apellidop_emp, apellidom_emp, fecha_contrato, fecha_nac_emp,
-             cp_emp, rfc_emp, calle_emp, col_emp)
-            VALUES (?,?,?,?,?,?,?,?,?,?)
-            RETURNING id_emp
+        INSERT INTO empleado 
+        (contra_emp, nombre_emp, apellidop_emp, apellidom_emp, fecha_contrato, fecha_nac_emp,
+         cp_emp, rfc_emp, calle_emp, col_emp)
+        VALUES (?,?,?,?,?,?,?,?,?,?)
+        RETURNING id_emp
         """;
 
             PreparedStatement ps = conn.prepareStatement(sqlEmpleado);
-            ps.setString(1, new String(vista.txtContra.getPassword()));
+            ps.setString(1, contraseñaCifrada); // contraseña cifrada
             ps.setString(2, vista.txtNombre.getText());
             ps.setString(3, vista.txtApP.getText());
             ps.setString(4, vista.txtApM.getText());
@@ -103,8 +107,8 @@ public class crudUsuario {
             }
 
             String sqlPermiso = """
-            INSERT INTO permiso_emp(id_emp, venta_pmp, inventario_pmp, crud_pmp, admin_pmp)
-            VALUES (?,?,?,?,?)
+        INSERT INTO permiso_emp(id_emp, venta_pmp, inventario_pmp, crud_pmp, admin_pmp)
+        VALUES (?,?,?,?,?)
         """;
 
             PreparedStatement psPermiso = conn.prepareStatement(sqlPermiso);
@@ -124,16 +128,31 @@ public class crudUsuario {
         }
     }
 
-    public void actualizarUsuario(Connection conn) {
+
+    public void actualizarUsuario(Connection conn, int idUsuarioSesion) {
         try {
+            int idEmpleadoModificar = Integer.parseInt(vista.txtId.getText());
+
+            // Si no es superusuario, no puede modificar al superusuario
+            if (idEmpleadoModificar == 1 && idUsuarioSesion != 1) {
+                JOptionPane.showMessageDialog(null,
+                        "No tienes permisos para modificar al super Usuario.");
+                return;
+            }
+
+            // Cifrar la contraseña antes de actualizar
+            String contraseñaPlano = new String(vista.txtContra.getPassword());
+            String contraseñaCifrada = inicioDeSesion.cifrar(contraseñaPlano);
+
             String sql = """
-                UPDATE empleado SET 
-                contra_emp=?, nombre_emp=?, apellidop_emp=?, apellidom_emp=?, 
-                fecha_contrato=?, fecha_nac_emp=?, cp_emp=?, rfc_emp=?, 
-                calle_emp=?, col_emp=? WHERE id_emp=?
-            """;
+        UPDATE empleado SET 
+        contra_emp=?, nombre_emp=?, apellidop_emp=?, apellidom_emp=?, 
+        fecha_contrato=?, fecha_nac_emp=?, cp_emp=?, rfc_emp=?, 
+        calle_emp=?, col_emp=? WHERE id_emp=?
+        """;
+
             PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setString(1, new String(vista.txtContra.getPassword()));
+            ps.setString(1, contraseñaCifrada); // contraseña cifrada
             ps.setString(2, vista.txtNombre.getText());
             ps.setString(3, vista.txtApP.getText());
             ps.setString(4, vista.txtApM.getText());
@@ -143,30 +162,46 @@ public class crudUsuario {
             ps.setString(8, vista.txtRFC.getText());
             ps.setString(9, vista.txtCalle.getText());
             ps.setString(10, vista.txtColonia.getText());
-            ps.setInt(11, Integer.parseInt(vista.txtId.getText()));
+            ps.setInt(11, idEmpleadoModificar);
             ps.executeUpdate();
 
             JOptionPane.showMessageDialog(null, "Empleado actualizado exitosamente");
+
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Error al actualizar: " + e.getMessage());
         }
     }
 
-    public void eliminarUsuario(Connection conn) {
+
+
+    public void eliminarUsuario(Connection conn, int idUsuarioSesion) {
         try {
-            String sql = "DELETE FROM empleado WHERE id_emp = ?";
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setInt(1, Integer.parseInt(vista.txtId.getText()));
-            if (vista.txtId.getText().equals("1")){
-                JOptionPane.showMessageDialog(null, "No se puede eliminar el administrador");
+            int idEmpleadoEliminar = Integer.parseInt(vista.txtId.getText());
+
+            // === CONTROL DE ADMIN ===
+            if (idEmpleadoEliminar == 1 && idUsuarioSesion != 1) {
+                JOptionPane.showMessageDialog(null,
+                        "No tienes permisos para eliminar al administrador.");
                 return;
             }
+            if (idEmpleadoEliminar == 1 && idUsuarioSesion == 1) {
+                JOptionPane.showMessageDialog(null,
+                        "No puedes borrar al super Usuario");
+                return;
+            }
+
+            String sql = "DELETE FROM empleado WHERE id_emp = ?";
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setInt(1, idEmpleadoEliminar);
             ps.executeUpdate();
+
             JOptionPane.showMessageDialog(null, "Empleado eliminado exitosamente");
+
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Error al eliminar: " + e.getMessage());
         }
     }
+
 
     //Esto para obtener los permisos de los usuarios y guardarlos para modifiacr
     public ArrayList<Object[]> obtenerPermisosUsuarios(Connection conn) {
