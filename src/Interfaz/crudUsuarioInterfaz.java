@@ -23,19 +23,66 @@ public class crudUsuarioInterfaz extends JFrame {
     private JTextField txtRFCBuscar, txtRFCAgregar, txtRFCActualizar;
     private JTextField txtCalleBuscar, txtCalleAgregar, txtCalleActualizar;
     private JTextField txtColoniaBuscar, txtColoniaAgregar, txtColoniaActualizar;
+    public JComboBox<String> comboRolAgregar;
+    public String rolSeleccionado;
+
+    public void setRolSeleccionado(String rol) {
+        this.rolSeleccionado = rol;
+    }
+
+    public String getRolSeleccionado() {
+        return rolSeleccionado;
+    }
+
+    public crudUsuarioInterfaz() {
+
+        // ==============================
+        // ESTILO CAFÉ (NO ROMPE NADA)
+        // ==============================
+        UIManager.put("TabbedPane.selected", new Color(130, 80, 50));
+        UIManager.put("TabbedPane.contentAreaColor", new Color(240, 225, 210));
+        UIManager.put("TabbedPane.focus", new Color(150, 100, 70));
+        UIManager.put("TabbedPane.tabsOpaque", false);
+
+        UIManager.put("Panel.background", new Color(245, 235, 220));
+        UIManager.put("Button.background", new Color(200, 170, 140));
+        UIManager.put("Button.foreground", Color.BLACK);
+        UIManager.put("Label.foreground", new Color(60, 40, 20));
+        UIManager.put("TextField.background", new Color(255, 250, 240));
+        UIManager.put("PasswordField.background", new Color(255, 250, 240));
+
+    }
+
+    private JPanel crearPanelConFondo(JPanel original) {
+        JPanel contenedor = new JPanel(new BorderLayout());
+        contenedor.setBackground(new Color(245, 235, 220));
+        original.setBackground(new Color(250, 240, 230));
+        contenedor.add(original, BorderLayout.CENTER);
+        return contenedor;
+    }
 
     public void crudEmpleadosInterfaz(Connection conn) {
-        setTitle("CRUD de Empleados");
-        setSize(700, 550);
+        setTitle("CRUD de Empleados - Luas Place");
+        setSize(750, 600);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
-        JTabbedPane pestañas = new JTabbedPane();
-        pestañas.add("Buscar / Eliminar", crearPanelBuscar(conn));
-        pestañas.add("Agregar", crearPanelAgregar(conn));
-        pestañas.add("Actualizar", crearPanelActualizar(conn));
-        pestañas.add("Permisos",crearPanelPermisos(conn));
+        // Fondo general
+        getContentPane().setBackground(new Color(245, 235, 220));
+
+        // ===============================
+        // PESTAÑAS A LA IZQUIERDA
+        // ===============================
+        JTabbedPane pestañas = new JTabbedPane(JTabbedPane.LEFT);
+        pestañas.setBackground(new Color(220, 200, 180));
+        pestañas.setForeground(Color.BLACK);
+        pestañas.setFont(new Font("Segoe UI", Font.BOLD, 14));
+
+        pestañas.add("Buscar / Eliminar", crearPanelConFondo(crearPanelBuscar(conn)));
+        pestañas.add("Agregar", crearPanelConFondo(crearPanelAgregar(conn)));
+        pestañas.add("Actualizar", crearPanelConFondo(crearPanelActualizar(conn)));
+        pestañas.add("Permisos", crearPanelConFondo(crearPanelPermisos(conn)));
 
         add(pestañas, BorderLayout.CENTER);
     }
@@ -120,8 +167,7 @@ public class crudUsuarioInterfaz extends JFrame {
 
     private JPanel crearPanelAgregar(Connection conn) {
         JPanel panel = new JPanel(new BorderLayout());
-
-        JPanel panelDatos = new JPanel(new GridLayout(10, 2, 5, 5));
+        JPanel panelDatos = new JPanel(new GridLayout(11, 2, 5, 5));
         panelDatos.setBorder(BorderFactory.createTitledBorder("Nuevo Empleado"));
 
         txtContraAgregar = new JPasswordField();
@@ -135,6 +181,14 @@ public class crudUsuarioInterfaz extends JFrame {
         txtCalleAgregar = new JTextField();
         txtColoniaAgregar = new JTextField();
 
+        // NUEVO: ComboBox de roles
+        comboRolAgregar = new JComboBox<>(new String[] {
+                "Empleado",
+                "Cajero",
+                "Manager"
+        });
+
+        // CAMPOS IGUAL QUE LA VERSIÓN VIEJA
         panelDatos.add(new JLabel("Contraseña:"));
         panelDatos.add(txtContraAgregar);
         panelDatos.add(new JLabel("Nombre:"));
@@ -156,19 +210,25 @@ public class crudUsuarioInterfaz extends JFrame {
         panelDatos.add(new JLabel("Colonia:"));
         panelDatos.add(txtColoniaAgregar);
 
+        // NUEVO: CAMPO DE ROL
+        panelDatos.add(new JLabel("Rol del Empleado:"));
+        panelDatos.add(comboRolAgregar);
+
         panel.add(panelDatos, BorderLayout.CENTER);
 
         JButton btnAgregar = new JButton("Agregar Empleado");
         panel.add(btnAgregar, BorderLayout.SOUTH);
 
         crudUsuario acciones = new crudUsuario(this);
+
         btnAgregar.addActionListener(e -> {
             asignarCamposAgregar();
+            setRolSeleccionado(comboRolAgregar.getSelectedItem().toString());
             acciones.agregarUsuario(conn);
         });
-
         return panel;
     }
+
 
 
     private JPanel crearPanelActualizar(Connection conn) {
@@ -237,65 +297,126 @@ public class crudUsuarioInterfaz extends JFrame {
         return panel;
     }
 
-    private JPanel crearPanelPermisos(Connection conn) {
-        crudUsuario acciones = new crudUsuario(this);
+   private JPanel crearPanelPermisos(Connection conn) {
+        crudUsuario funcUsuarios = new crudUsuario(this);
 
+        // === PANEL PRINCIPAL CAFÉ CLARO ===
         JPanel panel = new JPanel(new BorderLayout());
-        panel.setBorder(BorderFactory.createTitledBorder("Gestión de Permisos"));
+        panel.setBorder(BorderFactory.createTitledBorder(
+                BorderFactory.createLineBorder(new Color(120, 80, 50), 2, true), // café medio
+                "Gestión de Permisos",
+                0, 0,
+                new Font("Segoe UI", Font.BOLD, 16),
+                new Color(90, 55, 30) // café oscuro para texto
+        ));
+        panel.setBackground(new Color(240, 225, 205)); // beige café suave
 
-        // Panel para los usuarios
-        JPanel panelLista = new JPanel(new GridLayout(0, 1, 5, 5));
+        JPanel panelLista = new JPanel();
+        panelLista.setLayout(new BoxLayout(panelLista, BoxLayout.Y_AXIS));
+        panelLista.setBackground(new Color(240, 225, 205));
+
         JScrollPane scroll = new JScrollPane(panelLista);
+        scroll.setBorder(BorderFactory.createEmptyBorder());
+        scroll.getVerticalScrollBar().setUnitIncrement(16);
         panel.add(scroll, BorderLayout.CENTER);
 
-        // Obtenemos la lista de los usuarios
-        // Array secundario para la actualizacion
-        ArrayList<Object[]> listaUsuarios = acciones.obtenerPermisosUsuarios(conn);
+        ArrayList<Object[]> listaUsuarios = funcUsuarios.obtenerPermisosUsuarios(conn);
         ArrayList<JCheckBox[]> listaChecks = new ArrayList<>();
 
         for (Object[] usuario : listaUsuarios) {
             int idEmp = (int) usuario[0];
             String nombreEmp = (String) usuario[1];
-            boolean admin = (boolean) usuario[2];
-            boolean manager = (boolean) usuario[3];
 
-            JPanel fila = new JPanel(new FlowLayout(FlowLayout.LEFT));
-            fila.setBorder(BorderFactory.createEtchedBorder());
-            fila.add(new JLabel("ID: " + idEmp + " | " + nombreEmp));
+            boolean venta = (boolean) usuario[2];
+            boolean inventario = (boolean) usuario[3];
+            boolean crud = (boolean) usuario[4];
+            boolean admin = (boolean) usuario[5];
 
-            JCheckBox checarAdm = new JCheckBox("Admin", admin);
-            JCheckBox checarMnj = new JCheckBox("Manager", manager);
+            // === FILA DE USUARIO ===
+            JPanel fila = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 8));
+            fila.setBackground(new Color(255, 245, 230)); // café muy claro
+            fila.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(new Color(180, 150, 120)), // borde beige-café
+                    BorderFactory.createEmptyBorder(10, 10, 10, 10)
+            ));
 
-            fila.add(checarAdm);
-            fila.add(checarMnj);
+            JLabel lblUsuario = new JLabel("ID: " + idEmp + "  |  " + nombreEmp);
+            lblUsuario.setFont(new Font("Segoe UI", Font.BOLD, 14));
+            lblUsuario.setForeground(new Color(90, 55, 30)); // café oscuro
+            fila.add(lblUsuario);
 
-            listaChecks.add(new JCheckBox[]{checarAdm, checarMnj});
+            // === CHECKBOXES CAFÉ ===
+            JCheckBox chkVenta = new JCheckBox("Venta", venta);
+            JCheckBox chkInventario = new JCheckBox("Inventario", inventario);
+            JCheckBox chkCrud = new JCheckBox("CRUD", crud);
+            JCheckBox chkAdmin = new JCheckBox("Admin", admin);
 
-            // ID del empleado en el panel
+            Font fontCheck = new Font("Segoe UI", Font.PLAIN, 13);
+            JCheckBox[] conjuntoCheckBox = {chkVenta, chkInventario, chkCrud, chkAdmin};
+
+            for (JCheckBox c : conjuntoCheckBox) {
+                c.setFont(fontCheck);
+                c.setBackground(new Color(255, 245, 230)); // fondo
+                c.setForeground(new Color(110, 70, 40)); // café intermedio
+                fila.add(c);
+            }
+
+            listaChecks.add(conjuntoCheckBox);
             fila.putClientProperty("id_emp", idEmp);
+
             panelLista.add(fila);
+            panelLista.add(Box.createVerticalStrut(8));
         }
 
+        // === BOTÓN CAFÉ OSCURO ===
+        JButton btnActualizar = new JButton("Guardar Cambios");
+        btnActualizar.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        btnActualizar.setForeground(Color.WHITE);
+        btnActualizar.setBackground(new Color(110, 70, 40)); // café oscuro
+        btnActualizar.setFocusPainted(false);
+        btnActualizar.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
 
-        JButton btnGuardar = new JButton("Guardar Cambios");
-        btnGuardar.addActionListener(e -> {
-            Component[] filas = panelLista.getComponents();
-            for (Component comp : filas) {
-                if (comp instanceof JPanel fila) {
-                    int id = (int) fila.getClientProperty("id_emp");
-                    JCheckBox chkAdmin = (JCheckBox) ((JPanel) fila).getComponent(1);
-                    JCheckBox chkManager = (JCheckBox) ((JPanel) fila).getComponent(2);
-                    acciones.actualizarPermisos(conn, id, chkAdmin.isSelected(), chkManager.isSelected());
-                }
+        // efecto hover
+        btnActualizar.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                btnActualizar.setBackground(new Color(140, 90, 55)); // café más claro
             }
-            JOptionPane.showMessageDialog(panel, "Permisos actualizados correctamente.");
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                btnActualizar.setBackground(new Color(110, 70, 40));
+            }
         });
-        panel.add(btnGuardar, BorderLayout.SOUTH);
+
+        JPanel panelBoton = new JPanel();
+        panelBoton.setBackground(new Color(240, 225, 205)); // beige café
+        panelBoton.add(btnActualizar);
+
+        panel.add(panelBoton, BorderLayout.SOUTH);
+
+        // === ACCIÓN DEL BOTÓN ===
+        btnActualizar.addActionListener(e -> {
+            for (int i = 0; i < panelLista.getComponentCount(); i += 2) {
+                JPanel fila = (JPanel) panelLista.getComponent(i);
+                int idEmp = (int) fila.getClientProperty("id_emp");
+
+                JCheckBox[] boxes = listaChecks.get(i / 2);
+
+                boolean venta = boxes[0].isSelected();
+                boolean inventario = boxes[1].isSelected();
+                boolean crud = boxes[2].isSelected();
+                boolean admin = boxes[3].isSelected();
+
+                funcUsuarios.actualizarPermisos(conn, idEmp, venta, inventario, crud, admin);
+            }
+
+            JOptionPane.showMessageDialog(null,
+                    "Permisos actualizados correctamente.",
+                    "Éxito",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+        });
 
         return panel;
     }
-
-
 
     //Da lugar a los campos q estan estaticos para que las pestañas no se pasen informacion y los metodos tomen de las
     // mismos campos de texto ya matenmeeeeeeeeeeeeeeeeeeeeeeee
