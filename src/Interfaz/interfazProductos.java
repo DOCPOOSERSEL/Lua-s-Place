@@ -24,22 +24,18 @@ public class interfazProductos {
         JPanel base = new JPanel(new BorderLayout());
         base.setBackground(cafeC);
 
-        // ---------------------------
-        // ENCABEZADO DELGADO (regresado como antes)
-        // ---------------------------
         JPanel header = new JPanel(new BorderLayout());
         header.setBackground(cafeF);
-        header.setBorder(new EmptyBorder(8, 15, 8, 15)); // MÁS DELGADO
+        header.setBorder(new EmptyBorder(8, 15, 8, 15)); // delgado como antes
 
         JLabel titulo = new JLabel("Inventario de Productos y Panes");
         titulo.setForeground(Color.WHITE);
-        titulo.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        titulo.setFont(new Font("Segoe UI", Font.BOLD, 18)); // tamaño reducido
 
         header.add(titulo, BorderLayout.WEST);
 
-        // BOTÓN AGREGAR MÁS NOTABLE
         JButton btnAgregar = new JButton("Agregar");
-        btnAgregar.setBackground(new Color(210, 140, 90)); // claro y llamativo
+        btnAgregar.setBackground(new Color(210, 140, 90));
         btnAgregar.setForeground(Color.WHITE);
         btnAgregar.setFocusPainted(false);
         btnAgregar.setFont(new Font("Segoe UI", Font.BOLD, 15));
@@ -55,7 +51,6 @@ public class interfazProductos {
         });
 
         header.add(btnAgregar, BorderLayout.EAST);
-
         base.add(header, BorderLayout.NORTH);
 
         // ---------------------------
@@ -63,7 +58,7 @@ public class interfazProductos {
         // ---------------------------
         JPanel centro = new JPanel(new BorderLayout());
         centro.setBackground(cafeC);
-        centro.setBorder(new EmptyBorder(10, 20, 10, 20));
+        centro.setBorder(new EmptyBorder(40, 20, 10, 20)); // AUMENTADO
 
         JTable tabla = new JTable(new DefaultTableModel(
                 new String[]{"ID", "Nombre", "Precio", "Tipo"}, 0
@@ -103,9 +98,6 @@ public class interfazProductos {
 
         return base;
     }
-
-
-
 
     private void actualizarDetalles(Connection conn, JPanel panel, int id, String tipo) {
         panel.removeAll();
@@ -152,8 +144,16 @@ public class interfazProductos {
         tablaReceta.setRowHeight(26);
         fun.cargarReceta(conn, tablaReceta, id_pan);
 
+        tablaReceta.getTableHeader().setBackground(cafeM);
+        tablaReceta.getTableHeader().setForeground(Color.WHITE);
+        tablaReceta.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 14));
+        tablaReceta.setBackground(cafeC);
+        tablaReceta.setForeground(Color.BLACK);
+        tablaReceta.setGridColor(cafeM);
+
         JScrollPane scroll = new JScrollPane(tablaReceta);
-        scroll.setBorder(new EmptyBorder(10, 10, 10, 10));
+        scroll.setBorder(new EmptyBorder(25, 10, 10, 10));
+
         p.add(scroll, BorderLayout.CENTER);
 
         JPanel botones = new JPanel(new FlowLayout());
@@ -219,7 +219,7 @@ public class interfazProductos {
 
         guardar.addActionListener(e -> {
             double nueva = Double.parseDouble(txtCant.getText());
-            fun.modificarCantidadIngrediente(conn, id_rec, nueva); // CORREGIDO
+            fun.modificarCantidadIngrediente(conn, id_rec, nueva);
             fun.cargarReceta(conn, tabla, id_pan);
             d.dispose();
         });
@@ -235,17 +235,14 @@ public class interfazProductos {
         cont.setBackground(cafeC);
         cont.setBorder(new EmptyBorder(20, 20, 20, 20));
 
-        // Combo solo con nombres
         JComboBox<String> ingredientes = new JComboBox<>();
-
-        // Lista paralela para guardar los IDs REALES
         ArrayList<Integer> ids = new ArrayList<>();
 
         ArrayList<String[]> inv = fun.obtenerInventario(conn);
 
         for (String[] i : inv) {
-            ids.add(Integer.parseInt(i[0])); // guarda el ID
-            ingredientes.addItem(i[1]);      // muestra solo el nombre
+            ids.add(Integer.parseInt(i[0]));
+            ingredientes.addItem(i[1]);
         }
 
         JTextField txtCant = new JTextField();
@@ -263,9 +260,8 @@ public class interfazProductos {
 
         guardar.addActionListener(e -> {
             try {
-                int index = ingredientes.getSelectedIndex(); // posición seleccionada
-                int id_inv = ids.get(index);                 // obtiene ID real desde la lista paralela
-
+                int index = ingredientes.getSelectedIndex();
+                int id_inv = ids.get(index);
                 double cant = Double.parseDouble(txtCant.getText());
 
                 fun.agregarIngrediente(conn, id_pan, id_inv, cant);
@@ -279,7 +275,6 @@ public class interfazProductos {
 
         d.setVisible(true);
     }
-
 
     private void abrirVentanaAgregar(Connection conn, JTable tabla) {
 

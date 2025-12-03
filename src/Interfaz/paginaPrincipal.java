@@ -49,10 +49,11 @@ public class paginaPrincipal extends JFrame {
         pestañas.addTab("Productos", panelProductos);
 
         // Panel Ventas
-        JPanel panelVentas = new JPanel(new BorderLayout());
-        panelVentas.setBackground(new Color(245, 230, 210));
-        panelVentas.add(new JLabel("Interfaz de Ventas (En construcción)", SwingConstants.CENTER));
+        // Panel Ventas
+        interfazVentas ven = new interfazVentas(idUsuario);
+        JTabbedPane panelVentas = ven.crearPanelVentas(conn);
         pestañas.addTab("Ventas", panelVentas);
+
 
         // Panel inventario
         inventarioInterfaz inv = new inventarioInterfaz(conn);
