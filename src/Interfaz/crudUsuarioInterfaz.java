@@ -90,8 +90,15 @@ public class crudUsuarioInterfaz extends JFrame {
 
 
     private JPanel crearPanelBuscar(Connection conn) {
+
         JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(new Color(245, 235, 220));
+
+        // ===========================================================
+        //      PANEL SUPERIOR (Buscar / Eliminar)
+        // ===========================================================
         JPanel panelSuperior = new JPanel(new FlowLayout());
+        panelSuperior.setBackground(new Color(240, 225, 205));
 
         panelSuperior.add(new JLabel("ID Empleado:"));
         txtIdBuscar = new JTextField(10);
@@ -103,34 +110,9 @@ public class crudUsuarioInterfaz extends JFrame {
         panelSuperior.add(btnEliminar);
         panel.add(panelSuperior, BorderLayout.NORTH);
 
-        JPanel panelDatos = new JPanel(new GridLayout(10, 2, 5, 5));
-        panelDatos.setBorder(BorderFactory.createTitledBorder("Información del Empleado"));
-
-        panel.setBackground(new Color(245, 235, 220)); // Café claro
-        panelSuperior.setBackground(new Color(240, 225, 205));
-        panelDatos.setBackground(new Color(255, 245, 230));
-
-        panelDatos.setBorder(BorderFactory.createTitledBorder(
-                BorderFactory.createLineBorder(new Color(150, 110, 80), 2, true),
-                "Información del Empleado",
-                0, 0,
-                new Font("Segoe UI", Font.BOLD, 14),
-                new Color(90, 55, 30)
-        ));
-
-        for (Component comp : panelDatos.getComponents()) {
-            if (comp instanceof JLabel) {
-                comp.setForeground(new Color(90, 55, 30));
-            }
-            if (comp instanceof JTextField || comp instanceof JPasswordField) {
-                comp.setBackground(new Color(255, 250, 240));
-                comp.setForeground(new Color(60, 40, 20));
-            }
-        }
-
-        // Estilo café para botones Buscar / Eliminar
-        JButton[] botonesBuscarEliminar = {btnBuscar, btnEliminar};
-        for (JButton btn : botonesBuscarEliminar) {
+        // Estilo a botones café
+        JButton[] botones = {btnBuscar, btnEliminar};
+        for (JButton btn : botones) {
             btn.setFont(new Font("Segoe UI", Font.BOLD, 14));
             btn.setForeground(Color.WHITE);
             btn.setBackground(new Color(110, 70, 40));
@@ -147,9 +129,19 @@ public class crudUsuarioInterfaz extends JFrame {
             });
         }
 
+        // ===========================================================
+        //      PANEL DE DATOS DEL EMPLEADO BUSCADO
+        // ===========================================================
+        JPanel panelDatos = new JPanel(new GridLayout(9, 2, 5, 5));
+        panelDatos.setBackground(new Color(255, 245, 230));
+        panelDatos.setBorder(BorderFactory.createTitledBorder(
+                BorderFactory.createLineBorder(new Color(150, 110, 80), 2, true),
+                "Información del Empleado",
+                0, 0,
+                new Font("Segoe UI", Font.BOLD, 14),
+                new Color(90, 55, 30)
+        ));
 
-
-        txtContraBuscar = new JPasswordField();
         txtNombreBuscar = new JTextField();
         txtApPBuscar = new JTextField();
         txtApMBuscar = new JTextField();
@@ -160,49 +152,91 @@ public class crudUsuarioInterfaz extends JFrame {
         txtCalleBuscar = new JTextField();
         txtColoniaBuscar = new JTextField();
 
-        txtContraBuscar.setEditable(false);
-        txtNombreBuscar.setEditable(false);
-        txtApPBuscar.setEditable(false);
-        txtApMBuscar.setEditable(false);
-        txtFechaContratoBuscar.setEditable(false);
-        txtFechaNacBuscar.setEditable(false);
-        txtCPBuscar.setEditable(false);
-        txtRFCBuscar.setEditable(false);
-        txtCalleBuscar.setEditable(false);
-        txtColoniaBuscar.setEditable(false);
+        JTextField[] campos = {
+                txtNombreBuscar, txtApPBuscar, txtApMBuscar, txtFechaContratoBuscar,
+                txtFechaNacBuscar, txtCPBuscar, txtRFCBuscar, txtCalleBuscar, txtColoniaBuscar
+        };
+        for (JTextField txt : campos) txt.setEditable(false);
 
-
-        panelDatos.add(new JLabel("Contraseña:"));
-        panelDatos.add(txtContraBuscar);
-        panelDatos.add(new JLabel("Nombre:"));
-        panelDatos.add(txtNombreBuscar);
-        panelDatos.add(new JLabel("Apellido Paterno:"));
-        panelDatos.add(txtApPBuscar);
-        panelDatos.add(new JLabel("Apellido Materno:"));
-        panelDatos.add(txtApMBuscar);
-        panelDatos.add(new JLabel("Fecha de Contrato:"));
-        panelDatos.add(txtFechaContratoBuscar);
-        panelDatos.add(new JLabel("Fecha de Nacimiento:"));
-        panelDatos.add(txtFechaNacBuscar);
-        panelDatos.add(new JLabel("Código Postal:"));
-        panelDatos.add(txtCPBuscar);
-        panelDatos.add(new JLabel("RFC:"));
-        panelDatos.add(txtRFCBuscar);
-        panelDatos.add(new JLabel("Calle:"));
-        panelDatos.add(txtCalleBuscar);
-        panelDatos.add(new JLabel("Colonia:"));
-        panelDatos.add(txtColoniaBuscar);
+        panelDatos.add(new JLabel("Nombre:")); panelDatos.add(txtNombreBuscar);
+        panelDatos.add(new JLabel("Apellido Paterno:")); panelDatos.add(txtApPBuscar);
+        panelDatos.add(new JLabel("Apellido Materno:")); panelDatos.add(txtApMBuscar);
+        panelDatos.add(new JLabel("Fecha de Contrato:")); panelDatos.add(txtFechaContratoBuscar);
+        panelDatos.add(new JLabel("Fecha de Nacimiento:")); panelDatos.add(txtFechaNacBuscar);
+        panelDatos.add(new JLabel("Código Postal:")); panelDatos.add(txtCPBuscar);
+        panelDatos.add(new JLabel("RFC:")); panelDatos.add(txtRFCBuscar);
+        panelDatos.add(new JLabel("Calle:")); panelDatos.add(txtCalleBuscar);
+        panelDatos.add(new JLabel("Colonia:")); panelDatos.add(txtColoniaBuscar);
 
         panel.add(panelDatos, BorderLayout.CENTER);
 
+        // ===========================================================
+        //      LISTA DE TODOS LOS EMPLEADOS (ID, Nombre, Fecha, Activo)
+        // ===========================================================
+        JPanel panelLista = new JPanel();
+        panelLista.setLayout(new BoxLayout(panelLista, BoxLayout.Y_AXIS));
+        panelLista.setBackground(new Color(245, 235, 220));
+
+        JScrollPane scroll = new JScrollPane(panelLista);
+        scroll.setBorder(BorderFactory.createTitledBorder(
+                BorderFactory.createLineBorder(new Color(120, 80, 50), 2, true),
+                "Lista de Empleados",
+                0, 0,
+                new Font("Segoe UI", Font.BOLD, 14),
+                new Color(90, 55, 30)
+        ));
+
+        panel.add(scroll, BorderLayout.SOUTH);
+
+        Runnable cargarLista = () -> {
+            panelLista.removeAll();
+
+            try {
+                String sql = "SELECT id_emp, nombre_emp, apellidop_emp, fecha_contrato, contrato_emp FROM empleado ORDER BY id_emp";
+                PreparedStatement ps = conn.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery();
+
+                while (rs.next()) {
+                    int id = rs.getInt("id_emp");
+                    String nombre = rs.getString("nombre_emp") + " " + rs.getString("apellidop_emp");
+                    String fecha = rs.getString("fecha_contrato");
+                    boolean activo = rs.getBoolean("contrato_emp");
+
+                    JPanel fila = new JPanel(new FlowLayout(FlowLayout.LEFT));
+                    fila.setBackground(new Color(255, 248, 236));
+
+                    fila.add(new JLabel("ID: " + id + " | "));
+                    fila.add(new JLabel("Nombre: " + nombre + " | "));
+                    fila.add(new JLabel("Fecha: " + fecha + " | "));
+                    fila.add(new JLabel("Activo: " + (activo ? "Sí" : "No")));
+
+                    panelLista.add(fila);
+                }
+
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+
+            panelLista.revalidate();
+            panelLista.repaint();
+        };
+
+        cargarLista.run();
+
+        // ===========================================================
+        //      ACCIONES DE BOTONES
+        // ===========================================================
         crudUsuario acciones = new crudUsuario(this);
+
         btnBuscar.addActionListener(e -> {
-            asignarCamposBusqueda(); // conecta los campos específicos
+            asignarCamposBusqueda();
             acciones.buscarUsuario(conn);
         });
+
         btnEliminar.addActionListener(e -> {
             asignarCamposBusqueda();
             acciones.eliminarUsuario(conn, idUsuarioEnSesion);
+            cargarLista.run();
         });
 
         return panel;
@@ -247,7 +281,8 @@ public class crudUsuarioInterfaz extends JFrame {
         comboRolAgregar = new JComboBox<>(new String[] {
                 "Empleado",
                 "Cajero",
-                "Manager"
+                "Manager",
+                "Administrador"
         });
 
         panelDatos.add(new JLabel("Contraseña:"));
@@ -303,8 +338,6 @@ public class crudUsuarioInterfaz extends JFrame {
         });
         return panel;
     }
-
-
 
     private JPanel crearPanelActualizar(Connection conn) {
         JPanel panel = new JPanel(new BorderLayout());
@@ -426,19 +459,18 @@ public class crudUsuarioInterfaz extends JFrame {
         return panel;
     }
 
-   private JPanel crearPanelPermisos(Connection conn) {
+    private JPanel crearPanelPermisos(Connection conn) {
         crudUsuario funcUsuarios = new crudUsuario(this);
 
-        // === PANEL PRINCIPAL CAFÉ CLARO ===
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBorder(BorderFactory.createTitledBorder(
-                BorderFactory.createLineBorder(new Color(120, 80, 50), 2, true), // café medio
+                BorderFactory.createLineBorder(new Color(120, 80, 50), 2, true),
                 "Gestión de Permisos",
                 0, 0,
                 new Font("Segoe UI", Font.BOLD, 16),
-                new Color(90, 55, 30) // café oscuro para texto
+                new Color(90, 55, 30)
         ));
-        panel.setBackground(new Color(240, 225, 205)); // beige café suave
+        panel.setBackground(new Color(240, 225, 205));
 
         JPanel panelLista = new JPanel();
         panelLista.setLayout(new BoxLayout(panelLista, BoxLayout.Y_AXIS));
@@ -449,79 +481,70 @@ public class crudUsuarioInterfaz extends JFrame {
         scroll.getVerticalScrollBar().setUnitIncrement(16);
         panel.add(scroll, BorderLayout.CENTER);
 
-        ArrayList<Object[]> listaUsuarios = funcUsuarios.obtenerPermisosUsuarios(conn);
         ArrayList<JCheckBox[]> listaChecks = new ArrayList<>();
 
-        for (Object[] usuario : listaUsuarios) {
-            int idEmp = (int) usuario[0];
-            String nombreEmp = (String) usuario[1];
+        // ===== MÉTODO PARA CARGAR USUARIOS =====
+        Runnable cargarUsuarios = () -> {
+            panelLista.removeAll();
+            listaChecks.clear();
 
-            boolean venta = (boolean) usuario[2];
-            boolean inventario = (boolean) usuario[3];
-            boolean crud = (boolean) usuario[4];
-            boolean admin = (boolean) usuario[5];
+            ArrayList<Object[]> listaUsuarios = funcUsuarios.obtenerPermisosUsuarios(conn);
 
-            // === FILA DE USUARIO ===
-            JPanel fila = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 8));
-            fila.setBackground(new Color(255, 245, 230)); // café muy claro
-            fila.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createLineBorder(new Color(180, 150, 120)), // borde beige-café
-                    BorderFactory.createEmptyBorder(10, 10, 10, 10)
-            ));
+            for (Object[] usuario : listaUsuarios) {
+                int idEmp = (int) usuario[0];
+                String nombreEmp = (String) usuario[1];
 
-            JLabel lblUsuario = new JLabel("ID: " + idEmp + "  |  " + nombreEmp);
-            lblUsuario.setFont(new Font("Segoe UI", Font.BOLD, 14));
-            lblUsuario.setForeground(new Color(90, 55, 30)); // café oscuro
-            fila.add(lblUsuario);
+                boolean venta = (boolean) usuario[2];
+                boolean inventario = (boolean) usuario[3];
+                boolean crud = (boolean) usuario[4];
+                boolean admin = (boolean) usuario[5];
 
-            // === CHECKBOXES CAFÉ ===
-            JCheckBox chkVenta = new JCheckBox("Venta", venta);
-            JCheckBox chkInventario = new JCheckBox("Inventario", inventario);
-            JCheckBox chkCrud = new JCheckBox("CRUD", crud);
-            JCheckBox chkAdmin = new JCheckBox("Admin", admin);
+                JPanel fila = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 8));
+                fila.setBackground(new Color(255, 245, 230));
+                fila.setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(new Color(180, 150, 120)),
+                        BorderFactory.createEmptyBorder(10, 10, 10, 10)
+                ));
 
-            Font fontCheck = new Font("Segoe UI", Font.PLAIN, 13);
-            JCheckBox[] conjuntoCheckBox = {chkVenta, chkInventario, chkCrud, chkAdmin};
+                JLabel lblUsuario = new JLabel("ID: " + idEmp + "  |  " + nombreEmp);
+                lblUsuario.setFont(new Font("Segoe UI", Font.BOLD, 14));
+                lblUsuario.setForeground(new Color(90, 55, 30));
+                fila.add(lblUsuario);
 
-            for (JCheckBox c : conjuntoCheckBox) {
-                c.setFont(fontCheck);
-                c.setBackground(new Color(255, 245, 230)); // fondo
-                c.setForeground(new Color(110, 70, 40)); // café intermedio
-                fila.add(c);
+                JCheckBox chkVenta = new JCheckBox("Venta", venta);
+                JCheckBox chkInventario = new JCheckBox("Inventario", inventario);
+                JCheckBox chkCrud = new JCheckBox("CRUD", crud);
+                JCheckBox chkAdmin = new JCheckBox("Admin", admin);
+
+                JCheckBox[] conjuntoChecks = {chkVenta, chkInventario, chkCrud, chkAdmin};
+                listaChecks.add(conjuntoChecks);
+
+                for (JCheckBox c : conjuntoChecks) {
+                    c.setBackground(new Color(255, 245, 230));
+                    c.setForeground(new Color(110, 70, 40));
+                    fila.add(c);
+                }
+
+                fila.putClientProperty("id_emp", idEmp);
+
+                panelLista.add(fila);
+                panelLista.add(Box.createVerticalStrut(8));
             }
 
-            listaChecks.add(conjuntoCheckBox);
-            fila.putClientProperty("id_emp", idEmp);
+            panelLista.revalidate();
+            panelLista.repaint();
+        };
 
-            panelLista.add(fila);
-            panelLista.add(Box.createVerticalStrut(8));
-        }
+        // Primera carga
+        cargarUsuarios.run();
 
-        // === BOTÓN CAFÉ OSCURO ===
+        // ===== BOTÓN GUARDAR CAMBIOS =====
         JButton btnActualizar = new JButton("Guardar Cambios");
         btnActualizar.setFont(new Font("Segoe UI", Font.BOLD, 14));
         btnActualizar.setForeground(Color.WHITE);
-        btnActualizar.setBackground(new Color(110, 70, 40)); // café oscuro
+        btnActualizar.setBackground(new Color(110, 70, 40));
         btnActualizar.setFocusPainted(false);
-        btnActualizar.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
 
-        // efecto hover
-        btnActualizar.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                btnActualizar.setBackground(new Color(140, 90, 55)); // café más claro
-            }
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                btnActualizar.setBackground(new Color(110, 70, 40));
-            }
-        });
-
-        JPanel panelBoton = new JPanel();
-        panelBoton.setBackground(new Color(240, 225, 205)); // beige café
-        panelBoton.add(btnActualizar);
-
-        panel.add(panelBoton, BorderLayout.SOUTH);
-
-        // === ACCIÓN DEL BOTÓN ===
         btnActualizar.addActionListener(e -> {
             for (int i = 0; i < panelLista.getComponentCount(); i += 2) {
                 JPanel fila = (JPanel) panelLista.getComponent(i);
@@ -529,12 +552,14 @@ public class crudUsuarioInterfaz extends JFrame {
 
                 JCheckBox[] boxes = listaChecks.get(i / 2);
 
-                boolean venta = boxes[0].isSelected();
-                boolean inventario = boxes[1].isSelected();
-                boolean crud = boxes[2].isSelected();
-                boolean admin = boxes[3].isSelected();
-
-                funcUsuarios.actualizarPermisos(conn, idEmp, venta, inventario, crud, admin);
+                funcUsuarios.actualizarPermisos(
+                        conn,
+                        idEmp,
+                        boxes[0].isSelected(),
+                        boxes[1].isSelected(),
+                        boxes[2].isSelected(),
+                        boxes[3].isSelected()
+                );
             }
 
             JOptionPane.showMessageDialog(null,
@@ -544,8 +569,27 @@ public class crudUsuarioInterfaz extends JFrame {
             );
         });
 
+        // ===== BOTÓN REFRESCAR TABLA =====
+        JButton btnRefrescar = new JButton("Actualizar Lista");
+        btnRefrescar.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        btnRefrescar.setBackground(new Color(150, 100, 60));
+        btnRefrescar.setForeground(Color.WHITE);
+
+        btnRefrescar.addActionListener(e -> {
+            cargarUsuarios.run();
+
+        });
+
+        JPanel panelBotones = new JPanel();
+        panelBotones.setBackground(new Color(240, 225, 205));
+        panelBotones.add(btnActualizar);
+        panelBotones.add(btnRefrescar);
+
+        panel.add(panelBotones, BorderLayout.SOUTH);
+
         return panel;
     }
+
 
     //Da lugar a los campos q estan estaticos para que las pestañas no se pasen informacion y los metodos tomen de las
     // mismos campos de texto ya matenmeeeeeeeeeeeeeeeeeeeeeeee

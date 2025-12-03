@@ -20,7 +20,8 @@ public class crudUsuario {
             ResultSet rs = ps.executeQuery();
 
             if (rs.next()) {
-                vista.txtContra.setText(rs.getString("contra_emp"));
+
+                vista.txtContra.setText("********"); // Contraseña oculta
                 vista.txtNombre.setText(rs.getString("nombre_emp"));
                 vista.txtApP.setText(rs.getString("apellidop_emp"));
                 vista.txtApM.setText(rs.getString("apellidom_emp"));
@@ -30,14 +31,18 @@ public class crudUsuario {
                 vista.txtRFC.setText(rs.getString("rfc_emp"));
                 vista.txtCalle.setText(rs.getString("calle_emp"));
                 vista.txtColonia.setText(rs.getString("col_emp"));
+
                 JOptionPane.showMessageDialog(null, "Empleado encontrado");
+
             } else {
                 JOptionPane.showMessageDialog(null, "No se encontró el empleado");
             }
+
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Error al buscar: " + e.getMessage());
         }
     }
+
 
     public void agregarUsuario(Connection conn) {
         try {
@@ -104,10 +109,17 @@ public class crudUsuario {
                     crud = true;
                     admin = true;
                     break;
+
+                case "Administrador":
+                    venta = true;
+                    inventario = true;
+                    crud = true;
+                    admin = true;
+                    break;
             }
 
             String sqlPermiso = """
-        INSERT INTO permiso_emp(id_emp, venta_pmp, inventario_pmp, crud_pmp, admin_pmp)
+        INSERT INTO permiso_emp(id_emp, venta_pemp, inventario_pemp, crud_pemp, admin_pemp)
         VALUES (?,?,?,?,?)
         """;
 
@@ -181,31 +193,33 @@ public class crudUsuario {
             // === CONTROL DE ADMIN ===
             if (idEmpleadoEliminar == 1 && idUsuarioSesion != 1) {
                 JOptionPane.showMessageDialog(null,
-                        "No tienes permisos para eliminar al administrador.");
+                        "No tienes permisos para desactivar al administrador.");
                 return;
             }
             if (idEmpleadoEliminar == 1 && idUsuarioSesion == 1) {
                 JOptionPane.showMessageDialog(null,
-                        "No puedes borrar al super Usuario");
+                        "No puedes desactivar al super Usuario");
                 return;
             }
 
-            String sql = "DELETE FROM empleado WHERE id_emp = ?";
+            // ==== AHORA SOLO DESACTIVA ====
+            String sql = "UPDATE empleado SET contrato_emp = FALSE WHERE id_emp = ?";
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setInt(1, idEmpleadoEliminar);
             ps.executeUpdate();
 
-            JOptionPane.showMessageDialog(null, "Empleado eliminado exitosamente");
+            JOptionPane.showMessageDialog(null, "Empleado desactivado (contrato en FALSE).");
 
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Error al eliminar: " + e.getMessage());
+            JOptionPane.showMessageDialog(null, "Error al desactivar: " + e.getMessage());
         }
     }
 
 
-    //Esto para obtener los permisos de los usuarios y guardarlos para modifiacr
+
     public ArrayList<Object[]> obtenerPermisosUsuarios(Connection conn) {
         ArrayList<Object[]> lista = new ArrayList<>();
+
         String sql = """
         SELECT e.id_emp, 
                e.nombre_emp, 
@@ -217,8 +231,10 @@ public class crudUsuario {
                p.admin_pemp
         FROM empleado e
         INNER JOIN permiso_emp p ON e.id_emp = p.id_emp
+        WHERE e.contrato_emp = TRUE   -- SOLO EMPLEADOS ACTIVOS
         ORDER BY e.id_emp;
     """;
+
         try (Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
 
@@ -238,8 +254,10 @@ public class crudUsuario {
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al obtener permisos: " + e.getMessage());
         }
+
         return lista;
     }
+
 
 
     public void actualizarPermisos(Connection conn, int idEmp, boolean venta, boolean inventario, boolean crud, boolean admin) {

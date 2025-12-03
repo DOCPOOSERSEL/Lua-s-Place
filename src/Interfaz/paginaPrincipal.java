@@ -4,6 +4,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.sql.Connection;
 
+// IMPORTANTE: importar inventarioInterfaz
+import Interfaz.inventarioInterfaz;
+
 public class paginaPrincipal extends JFrame {
 
     public void MenuPrincipal(Connection conn, int idUsuario) {
@@ -16,34 +19,34 @@ public class paginaPrincipal extends JFrame {
         setLayout(new BorderLayout());
 
         JPanel panelSuperior = new JPanel(new BorderLayout());
-        panelSuperior.setBackground(new Color(90, 60, 40));  // Café oscuro
+        panelSuperior.setBackground(new Color(90, 60, 40));
         panelSuperior.setBorder(BorderFactory.createEmptyBorder(10, 15, 10, 15));
 
         JLabel titulo = new JLabel("Luas Place - Sistema de Gestión");
         titulo.setFont(new Font("Segoe UI", Font.BOLD, 22));
-        titulo.setForeground(new Color(255, 240, 220)); // Beige suave
+        titulo.setForeground(new Color(255, 240, 220));
         panelSuperior.add(titulo, BorderLayout.WEST);
         add(panelSuperior, BorderLayout.NORTH);
 
         JTabbedPane pestañas = new JTabbedPane();
         pestañas.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        pestañas.setBackground(new Color(230, 210, 180));  // Beige café claro
-        pestañas.setForeground(new Color(70, 40, 20));     // Texto café oscuro
+        pestañas.setBackground(new Color(230, 210, 180));
+        pestañas.setForeground(new Color(70, 40, 20));
 
         // CRUD Usuarios
         crudUsuarioInterfaz crud = new crudUsuarioInterfaz(idUsuario);
         crud.crudEmpleadosInterfaz(conn);
-
         JPanel panelCrud = new JPanel(new BorderLayout());
-        panelCrud.setBackground(new Color(245, 230, 210));   // Fondo cálido
+        panelCrud.setBackground(new Color(245, 230, 210));
         panelCrud.add(crud.getContentPane(), BorderLayout.CENTER);
         pestañas.addTab("Usuarios", panelCrud);
 
-        // Panel PAN
-        JPanel panelPan = new JPanel(new BorderLayout());
-        panelPan.setBackground(new Color(245, 230, 210));
-        panelPan.add(new JLabel("Interfaz de PAN (No funcional todavía)", SwingConstants.CENTER));
-        pestañas.addTab("Pan", panelPan);
+        // Panel PAN/Productos
+        JPanel panelProductos = new JPanel(new BorderLayout());
+        panelProductos.setBackground(new Color(245, 230, 210));
+        interfazProductos productosUI = new interfazProductos(conn);
+        panelProductos.add(productosUI.crearPantalla(conn), BorderLayout.CENTER);
+        pestañas.addTab("Productos", panelProductos);
 
         // Panel Ventas
         JPanel panelVentas = new JPanel(new BorderLayout());
@@ -51,21 +54,17 @@ public class paginaPrincipal extends JFrame {
         panelVentas.add(new JLabel("Interfaz de Ventas (En construcción)", SwingConstants.CENTER));
         pestañas.addTab("Ventas", panelVentas);
 
-        // Panel Inventario
-        JPanel panelInv = new JPanel(new BorderLayout());
-        panelInv.setBackground(new Color(245, 230, 210));
-        panelInv.add(new JLabel("Interfaz de Inventario (Próximamente)", SwingConstants.CENTER));
-        pestañas.addTab("Inventario", panelInv);
+        // Panel inventario
+        inventarioInterfaz inv = new inventarioInterfaz(conn);
+        JTabbedPane panelInventario = inv.crearMenuInventario(conn);
+        pestañas.addTab("Inventario", panelInventario);
 
-        // === Panel Registros ===
-        // === Panel Registros ===
+        // Panel Registros
         controlSesionInterfaz panelSesiones = new controlSesionInterfaz(conn);
         JPanel panelReg = new JPanel(new BorderLayout());
         panelReg.setBackground(new Color(245, 230, 210));
         panelReg.add(panelSesiones, BorderLayout.CENTER);
         pestañas.addTab("Registros", panelReg);
-
-
         add(pestañas, BorderLayout.CENTER);
     }
 }
