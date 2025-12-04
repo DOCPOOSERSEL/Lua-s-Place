@@ -63,45 +63,35 @@ public class controlSesiones {
         return lista;
     }
 
-    // =======================================================
-    // MÉTODO PARA VERIFICAR PERMISO
-    // =======================================================
     public static boolean tienePermiso(int idEmpleado, String permiso, Connection conn) {
-        String columna;
-        switch (permiso.toLowerCase()) {
-            case "venta":
-                columna = "venta_perm";
-                break;
-            case "inventario":
-                columna = "inventario_perm";
-                break;
-            case "crud":
-                columna = "crud_perm";
-                break;
-            case "admin":
-                columna = "admin_perm";
-                break;
-            default:
-                throw new IllegalArgumentException("Permiso no válido: " + permiso);
-        }
 
-        String sql = """
-            SELECT pd.%s
-            FROM empleado e
-            INNER JOIN permiso_detalle pd ON e.rol_emp = pd.id_pemp
-            WHERE e.id_emp = ?
-        """.formatted(columna);
+        String columna = switch (permiso.toLowerCase()) {
+            case "ventas" -> "venta_perm";
+            case "inventario" -> "inventario_perm";
+            case "crud" -> "crud_perm";
+            case "admin" -> "admin_perm";
+            default -> null;
+        };
+
+        if (columna == null) return false;
+
+        String sql = "SELECT " + columna + " FROM permiso_detalle pd " +
+                "INNER JOIN empleado e ON e.rol_emp = pd.id_pemp " +
+                "WHERE e.id_emp = ?";
 
         try (PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setInt(1, idEmpleado);
             ResultSet rs = pst.executeQuery();
+
             if (rs.next()) {
-                return rs.getBoolean(1);
+                return rs.getBoolean(columna);
             }
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
-        return false; // Si ocurre un error o no existe, retorna false
+        return false;
     }
+
 }
