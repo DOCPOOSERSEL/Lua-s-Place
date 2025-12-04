@@ -1,6 +1,7 @@
 package Interfaz;
 
 import Funciones.funcionesProductos;
+import Funciones.controlSesiones;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -13,11 +14,16 @@ public class interfazProductos {
 
     funcionesProductos fun = new funcionesProductos();
 
+    private int idUsuarioEnSesion;  // <<--- AGREGADO
+
     Color cafeF = new Color(92, 64, 51);
     Color cafeM = new Color(160, 120, 90);
     Color cafeC = new Color(245, 235, 220);
 
-    public interfazProductos(Connection conn) {}
+    // <<-- AHORA RECIBE EL ID DEL USUARIO
+    public interfazProductos(Connection conn, int idUsuarioEnSesion) {
+        this.idUsuarioEnSesion = idUsuarioEnSesion;
+    }
 
     public JPanel crearPantalla(Connection conn) {
 
@@ -26,11 +32,11 @@ public class interfazProductos {
 
         JPanel header = new JPanel(new BorderLayout());
         header.setBackground(cafeF);
-        header.setBorder(new EmptyBorder(8, 15, 8, 15)); // delgado como antes
+        header.setBorder(new EmptyBorder(8, 15, 8, 15));
 
         JLabel titulo = new JLabel("Inventario de Productos y Panes");
         titulo.setForeground(Color.WHITE);
-        titulo.setFont(new Font("Segoe UI", Font.BOLD, 18)); // tamaño reducido
+        titulo.setFont(new Font("Segoe UI", Font.BOLD, 18));
 
         header.add(titulo, BorderLayout.WEST);
 
@@ -50,15 +56,19 @@ public class interfazProductos {
             }
         });
 
+        // ============================
+        // ❌ OCULTAR BOTÓN AGREGAR SI NO TIENE CRUD
+        // ============================
+        if (!controlSesiones.tienePermiso(idUsuarioEnSesion, "crud", conn)) {
+            btnAgregar.setVisible(false);
+        }
+
         header.add(btnAgregar, BorderLayout.EAST);
         base.add(header, BorderLayout.NORTH);
 
-        // ---------------------------
-        // PANEL CENTRAL
-        // ---------------------------
         JPanel centro = new JPanel(new BorderLayout());
         centro.setBackground(cafeC);
-        centro.setBorder(new EmptyBorder(40, 20, 10, 20)); // AUMENTADO
+        centro.setBorder(new EmptyBorder(40, 20, 10, 20));
 
         JTable tabla = new JTable(new DefaultTableModel(
                 new String[]{"ID", "Nombre", "Precio", "Tipo"}, 0
@@ -77,9 +87,6 @@ public class interfazProductos {
 
         base.add(centro, BorderLayout.CENTER);
 
-        // ---------------------------
-        // PANEL DE DETALLES ABAJO
-        // ---------------------------
         JPanel detalles = new JPanel(new BorderLayout());
         detalles.setBackground(cafeC);
         detalles.setBorder(new EmptyBorder(15, 30, 15, 30));
@@ -93,7 +100,6 @@ public class interfazProductos {
             }
         });
 
-        // BOTÓN AGREGAR (FUNCIONAL)
         btnAgregar.addActionListener(e -> abrirVentanaAgregar(conn, tabla));
 
         return base;
@@ -168,6 +174,15 @@ public class interfazProductos {
         botones.add(mod);
         botones.add(del);
         botones.add(back);
+
+        // ============================
+        // ❌ OCULTAR BOTONES DE CRUD SI NO TIENE PERMISO
+        // ============================
+        boolean puedeCRUD = controlSesiones.tienePermiso(idUsuarioEnSesion, "crud", conn);
+
+        add.setVisible(puedeCRUD);
+        del.setVisible(puedeCRUD);
+        mod.setVisible(puedeCRUD);
 
         p.add(botones, BorderLayout.SOUTH);
 

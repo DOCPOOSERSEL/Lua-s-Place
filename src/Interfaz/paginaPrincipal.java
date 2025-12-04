@@ -52,7 +52,7 @@ public class paginaPrincipal extends JFrame {
             JPanel panelProductos = new JPanel(new BorderLayout());
             panelProductos.setBackground(new Color(245, 230, 210));
 
-            interfazProductos productosUI = new interfazProductos(conn);
+            interfazProductos productosUI = new interfazProductos(conn,idUsuario);
             panelProductos.add(productosUI.crearPantalla(conn), BorderLayout.CENTER);
 
             pestañas.addTab("Productos", panelProductos);
@@ -68,7 +68,7 @@ public class paginaPrincipal extends JFrame {
 
         // ===================== Inventario =====================
         if (controlSesiones.tienePermiso(idUsuario, "inventario", conn)) {
-            inventarioInterfaz inv = new inventarioInterfaz(conn);
+            inventarioInterfaz inv = new inventarioInterfaz(conn, idUsuario);
             JTabbedPane panelInventario = inv.crearMenuInventario(conn);
 
             pestañas.addTab("Inventario", panelInventario);
