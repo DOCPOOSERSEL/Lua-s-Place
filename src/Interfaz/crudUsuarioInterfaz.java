@@ -7,11 +7,11 @@ import java.util.ArrayList;
 import javax.swing.*;
 
 public class crudUsuarioInterfaz extends JFrame {
-    //Texto compartido para uso dinamico de mis funciones y para que no se pasen la pinche informacion entre pestañas
+    //Campos compartidos para funciones dinámicas
     public JTextField txtId, txtNombre, txtApP, txtApM, txtCP, txtRFC, txtCalle, txtColonia, txtFechaNac, txtFechaContrato;
     public JPasswordField txtContra;
 
-    // Campos propios de cada sub pestaña
+    // Campos por pestaña
     private JTextField txtIdBuscar, txtIdActualizar;
     private JPasswordField txtContraBuscar, txtContraAgregar, txtContraActualizar;
     private JTextField txtNombreBuscar, txtNombreAgregar, txtNombreActualizar;
@@ -23,146 +23,103 @@ public class crudUsuarioInterfaz extends JFrame {
     private JTextField txtRFCBuscar, txtRFCAgregar, txtRFCActualizar;
     private JTextField txtCalleBuscar, txtCalleAgregar, txtCalleActualizar;
     private JTextField txtColoniaBuscar, txtColoniaAgregar, txtColoniaActualizar;
-    public JComboBox<String> comboRolAgregar;
+
+    public JComboBox<String> comboRolAgregar, comboRolActualizar;
     public String rolSeleccionado;
     private int idUsuarioEnSesion;
+
+    // ===========================================================
+    // COLORES CAFÉ CLARO Y OSCURO
+    // ===========================================================
+    private Color cafeClaro = new Color(210, 180, 140);    // fondo general
+    private Color cafeSuave = new Color(235, 215, 185);    // paneles internos
+    private Color cafeOscuro = new Color(90, 50, 30);      // texto
+    private Color cafeIntenso = new Color(120, 80, 40);    // botones
+    private Color blanco = new Color(245, 245, 220);       // campos de texto
 
     public crudUsuarioInterfaz(int idUsuario) {
         this.idUsuarioEnSesion = idUsuario;
     }
 
+    public void setRolSeleccionado(String rol) { this.rolSeleccionado = rol; }
+    public String getRolSeleccionado() { return rolSeleccionado; }
 
-    public void setRolSeleccionado(String rol) {
-        this.rolSeleccionado = rol;
-    }
-
-    public String getRolSeleccionado() {
-        return rolSeleccionado;
-    }
-
-    public crudUsuarioInterfaz() {
-
-        UIManager.put("TabbedPane.selected", new Color(130, 80, 50));
-        UIManager.put("TabbedPane.contentAreaColor", new Color(240, 225, 210));
-        UIManager.put("TabbedPane.focus", new Color(150, 100, 70));
-        UIManager.put("TabbedPane.tabsOpaque", false);
-
-        UIManager.put("Panel.background", new Color(245, 235, 220));
-        UIManager.put("Button.background", new Color(200, 170, 140));
-        UIManager.put("Button.foreground", Color.BLACK);
-        UIManager.put("Label.foreground", new Color(60, 40, 20));
-        UIManager.put("TextField.background", new Color(255, 250, 240));
-        UIManager.put("PasswordField.background", new Color(255, 250, 240));
-
-    }
-
-    private JPanel crearPanelConFondo(JPanel original) {
-        JPanel contenedor = new JPanel(new BorderLayout());
-        contenedor.setBackground(new Color(245, 235, 220));
-        original.setBackground(new Color(250, 240, 230));
-        contenedor.add(original, BorderLayout.CENTER);
-        return contenedor;
-    }
-
+    // ===========================================================
+    // INTERFAZ PRINCIPAL
+    // ===========================================================
     public void crudEmpleadosInterfaz(Connection conn) {
         setTitle("CRUD de Empleados - Luas Place");
-        setSize(750, 600);
+        setSize(800, 600);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
-
-        // Fondo general
-        getContentPane().setBackground(new Color(245, 235, 220));
-
+        getContentPane().setBackground(cafeClaro);
 
         JTabbedPane pestañas = new JTabbedPane(JTabbedPane.LEFT);
-        pestañas.setBackground(new Color(220, 200, 180));
-        pestañas.setForeground(Color.BLACK);
+        pestañas.setBackground(cafeIntenso);
+        pestañas.setForeground(Color.WHITE);
         pestañas.setFont(new Font("Segoe UI", Font.BOLD, 14));
 
-        pestañas.add("Buscar / Eliminar", crearPanelConFondo(crearPanelBuscar(conn)));
-        pestañas.add("Agregar", crearPanelConFondo(crearPanelAgregar(conn)));
-        pestañas.add("Actualizar", crearPanelConFondo(crearPanelActualizar(conn)));
-        pestañas.add("Permisos", crearPanelConFondo(crearPanelPermisos(conn)));
+        pestañas.add("Buscar / Eliminar", crearPanelBuscar(conn));
+        pestañas.add("Agregar", crearPanelAgregar(conn));
+        pestañas.add("Actualizar", crearPanelActualizar(conn));
+        pestañas.add("Permisos", crearPanelPermisos(conn));
 
         add(pestañas, BorderLayout.CENTER);
     }
 
+    private JPanel crearPanelConFondo(JPanel original) {
+        JPanel contenedor = new JPanel(new BorderLayout());
+        contenedor.setBackground(cafeSuave);
+        original.setBackground(cafeSuave);
+        contenedor.add(original, BorderLayout.CENTER);
+        return contenedor;
+    }
 
+    // ===========================================================
+    // PANEL BUSCAR / ELIMINAR
+    // ===========================================================
     private JPanel crearPanelBuscar(Connection conn) {
-
         JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(new Color(245, 235, 220));
+        panel.setBackground(cafeSuave);
 
-        // ===========================================================
-        //      PANEL SUPERIOR (Buscar / Eliminar)
-        // ===========================================================
         JPanel panelSuperior = new JPanel(new FlowLayout());
-        panelSuperior.setBackground(new Color(240, 225, 205));
-
+        panelSuperior.setBackground(cafeClaro);
         panelSuperior.add(new JLabel("ID Empleado:"));
         txtIdBuscar = new JTextField(10);
+        txtIdBuscar.setBackground(blanco);
+        txtIdBuscar.setForeground(cafeOscuro);
         panelSuperior.add(txtIdBuscar);
 
         JButton btnBuscar = new JButton("Buscar");
+        btnBuscar.setBackground(cafeIntenso);
+        btnBuscar.setForeground(Color.WHITE);
         JButton btnEliminar = new JButton("Eliminar");
+        btnEliminar.setBackground(cafeIntenso);
+        btnEliminar.setForeground(Color.WHITE);
         panelSuperior.add(btnBuscar);
         panelSuperior.add(btnEliminar);
         panel.add(panelSuperior, BorderLayout.NORTH);
 
-        // Estilo a botones café
-        JButton[] botones = {btnBuscar, btnEliminar};
-        for (JButton btn : botones) {
-            btn.setFont(new Font("Segoe UI", Font.BOLD, 14));
-            btn.setForeground(Color.WHITE);
-            btn.setBackground(new Color(110, 70, 40));
-            btn.setFocusPainted(false);
-            btn.setBorder(BorderFactory.createEmptyBorder(8, 15, 8, 15));
-
-            btn.addMouseListener(new java.awt.event.MouseAdapter() {
-                public void mouseEntered(java.awt.event.MouseEvent evt) {
-                    btn.setBackground(new Color(140, 90, 55));
-                }
-                public void mouseExited(java.awt.event.MouseEvent evt) {
-                    btn.setBackground(new Color(110, 70, 40));
-                }
-            });
-        }
-
-        // ===========================================================
-        //      PANEL DE DATOS DEL EMPLEADO BUSCADO
-        // ===========================================================
         JPanel panelDatos = new JPanel(new GridLayout(9, 2, 5, 5));
-        panelDatos.setBackground(new Color(255, 245, 230));
-        panelDatos.setBorder(BorderFactory.createTitledBorder(
-                BorderFactory.createLineBorder(new Color(150, 110, 80), 2, true),
-                "Información del Empleado",
-                0, 0,
-                new Font("Segoe UI", Font.BOLD, 14),
-                new Color(90, 55, 30)
-        ));
-
-        txtNombreBuscar = new JTextField();
-        txtApPBuscar = new JTextField();
-        txtApMBuscar = new JTextField();
-        txtFechaContratoBuscar = new JTextField();
-        txtFechaNacBuscar = new JTextField();
-        txtCPBuscar = new JTextField();
-        txtRFCBuscar = new JTextField();
-        txtCalleBuscar = new JTextField();
-        txtColoniaBuscar = new JTextField();
-
-        JTextField[] campos = {
-                txtNombreBuscar, txtApPBuscar, txtApMBuscar, txtFechaContratoBuscar,
-                txtFechaNacBuscar, txtCPBuscar, txtRFCBuscar, txtCalleBuscar, txtColoniaBuscar
-        };
-        for (JTextField txt : campos) txt.setEditable(false);
+        panelDatos.setBackground(cafeSuave);
+        txtNombreBuscar = new JTextField(); txtApPBuscar = new JTextField(); txtApMBuscar = new JTextField();
+        txtFechaContratoBuscar = new JTextField(); txtFechaNacBuscar = new JTextField();
+        txtCPBuscar = new JTextField(); txtRFCBuscar = new JTextField();
+        txtCalleBuscar = new JTextField(); txtColoniaBuscar = new JTextField();
+        JTextField[] campos = {txtNombreBuscar, txtApPBuscar, txtApMBuscar, txtFechaContratoBuscar,
+                txtFechaNacBuscar, txtCPBuscar, txtRFCBuscar, txtCalleBuscar, txtColoniaBuscar};
+        for (JTextField txt : campos) {
+            txt.setEditable(false);
+            txt.setBackground(blanco);
+            txt.setForeground(cafeOscuro);
+        }
 
         panelDatos.add(new JLabel("Nombre:")); panelDatos.add(txtNombreBuscar);
         panelDatos.add(new JLabel("Apellido Paterno:")); panelDatos.add(txtApPBuscar);
         panelDatos.add(new JLabel("Apellido Materno:")); panelDatos.add(txtApMBuscar);
-        panelDatos.add(new JLabel("Fecha de Contrato:")); panelDatos.add(txtFechaContratoBuscar);
-        panelDatos.add(new JLabel("Fecha de Nacimiento:")); panelDatos.add(txtFechaNacBuscar);
+        panelDatos.add(new JLabel("Fecha Contrato:")); panelDatos.add(txtFechaContratoBuscar);
+        panelDatos.add(new JLabel("Fecha Nacimiento:")); panelDatos.add(txtFechaNacBuscar);
         panelDatos.add(new JLabel("Código Postal:")); panelDatos.add(txtCPBuscar);
         panelDatos.add(new JLabel("RFC:")); panelDatos.add(txtRFCBuscar);
         panelDatos.add(new JLabel("Calle:")); panelDatos.add(txtCalleBuscar);
@@ -170,226 +127,123 @@ public class crudUsuarioInterfaz extends JFrame {
 
         panel.add(panelDatos, BorderLayout.CENTER);
 
-        // ===========================================================
-        //      LISTA DE TODOS LOS EMPLEADOS (ID, Nombre, Fecha, Activo)
-        // ===========================================================
         JPanel panelLista = new JPanel();
         panelLista.setLayout(new BoxLayout(panelLista, BoxLayout.Y_AXIS));
-        panelLista.setBackground(new Color(245, 235, 220));
-
+        panelLista.setBackground(cafeSuave);
         JScrollPane scroll = new JScrollPane(panelLista);
-        scroll.setBorder(BorderFactory.createTitledBorder(
-                BorderFactory.createLineBorder(new Color(120, 80, 50), 2, true),
-                "Lista de Empleados",
-                0, 0,
-                new Font("Segoe UI", Font.BOLD, 14),
-                new Color(90, 55, 30)
-        ));
-
         panel.add(scroll, BorderLayout.SOUTH);
 
         Runnable cargarLista = () -> {
             panelLista.removeAll();
-
             try {
                 String sql = "SELECT id_emp, nombre_emp, apellidop_emp, fecha_contrato, contrato_emp FROM empleado ORDER BY id_emp";
                 PreparedStatement ps = conn.prepareStatement(sql);
                 ResultSet rs = ps.executeQuery();
-
                 while (rs.next()) {
                     int id = rs.getInt("id_emp");
                     String nombre = rs.getString("nombre_emp") + " " + rs.getString("apellidop_emp");
                     String fecha = rs.getString("fecha_contrato");
                     boolean activo = rs.getBoolean("contrato_emp");
-
                     JPanel fila = new JPanel(new FlowLayout(FlowLayout.LEFT));
-                    fila.setBackground(new Color(255, 248, 236));
-
-                    fila.add(new JLabel("ID: " + id + " | "));
-                    fila.add(new JLabel("Nombre: " + nombre + " | "));
-                    fila.add(new JLabel("Fecha: " + fecha + " | "));
-                    fila.add(new JLabel("Activo: " + (activo ? "Sí" : "No")));
-
+                    fila.setBackground(cafeSuave);
+                    fila.setBorder(BorderFactory.createLineBorder(cafeOscuro, 1));
+                    JLabel lbl = new JLabel("ID: " + id + " | Nombre: " + nombre + " | Fecha: " + fecha + " | Activo: " + (activo ? "Sí" : "No"));
+                    lbl.setForeground(cafeOscuro);
+                    fila.add(lbl);
                     panelLista.add(fila);
                 }
-
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-
+            } catch (Exception ex) { ex.printStackTrace(); }
             panelLista.revalidate();
             panelLista.repaint();
         };
-
         cargarLista.run();
 
-        // ===========================================================
-        //      ACCIONES DE BOTONES
-        // ===========================================================
         crudUsuario acciones = new crudUsuario(this);
-
-        btnBuscar.addActionListener(e -> {
-            asignarCamposBusqueda();
-            acciones.buscarUsuario(conn);
-        });
-
-        btnEliminar.addActionListener(e -> {
-            asignarCamposBusqueda();
-            acciones.eliminarUsuario(conn, idUsuarioEnSesion);
-            cargarLista.run();
-        });
+        btnBuscar.addActionListener(e -> { asignarCamposBusqueda(); acciones.buscarUsuario(conn); });
+        btnEliminar.addActionListener(e -> { asignarCamposBusqueda(); acciones.eliminarUsuario(conn, idUsuarioEnSesion); cargarLista.run(); });
 
         return panel;
     }
 
-
+    // ===========================================================
+    // PANEL AGREGAR
+    // ===========================================================
     private JPanel crearPanelAgregar(Connection conn) {
         JPanel panel = new JPanel(new BorderLayout());
-        JPanel panelDatos = new JPanel(new GridLayout(11, 2, 5, 5));
-        panelDatos.setBorder(BorderFactory.createTitledBorder("Nuevo Empleado"));
+        JPanel panelDatos = new JPanel(new GridLayout(11,2,5,5));
+        panelDatos.setBackground(cafeSuave);
 
-        panel.setBackground(new Color(245, 235, 220));
-        panelDatos.setBackground(new Color(255, 245, 230));
+        txtContraAgregar = new JPasswordField(); txtNombreAgregar = new JTextField();
+        txtApPAgregar = new JTextField(); txtApMAgregar = new JTextField();
+        txtFechaContratoAgregar = new JTextField(); txtFechaNacAgregar = new JTextField();
+        txtCPAgregar = new JTextField(); txtRFCAgregar = new JTextField();
+        txtCalleAgregar = new JTextField(); txtColoniaAgregar = new JTextField();
 
-        panelDatos.setBorder(BorderFactory.createTitledBorder(
-                BorderFactory.createLineBorder(new Color(150, 110, 80), 2, true),
-                "Nuevo Empleado",
-                0, 0,
-                new Font("Segoe UI", Font.BOLD, 14),
-                new Color(90, 55, 30)
-        ));
-
-        for (Component comp : panelDatos.getComponents()) {
-            if (comp instanceof JLabel)
-                comp.setForeground(new Color(90, 55, 30));
-
-            if (comp instanceof JTextField || comp instanceof JPasswordField || comp instanceof JComboBox)
-                comp.setBackground(new Color(255, 250, 240));
+        JTextField[] campos = {txtNombreAgregar, txtApPAgregar, txtApMAgregar, txtFechaContratoAgregar,
+                txtFechaNacAgregar, txtCPAgregar, txtRFCAgregar, txtCalleAgregar, txtColoniaAgregar};
+        for (JTextField txt : campos) {
+            txt.setBackground(blanco);
+            txt.setForeground(cafeOscuro);
         }
+        txtContraAgregar.setBackground(blanco); txtContraAgregar.setForeground(cafeOscuro);
 
-        txtContraAgregar = new JPasswordField();
-        txtNombreAgregar = new JTextField();
-        txtApPAgregar = new JTextField();
-        txtApMAgregar = new JTextField();
-        txtFechaContratoAgregar = new JTextField();
-        txtFechaNacAgregar = new JTextField();
-        txtCPAgregar = new JTextField();
-        txtRFCAgregar = new JTextField();
-        txtCalleAgregar = new JTextField();
-        txtColoniaAgregar = new JTextField();
+        comboRolAgregar = new JComboBox<>();
+        crudUsuario func = new crudUsuario(this);
+        ArrayList<Object[]> roles = func.obtenerRoles(conn);
+        for (Object[] r : roles) comboRolAgregar.addItem((String) r[1]);
 
-        comboRolAgregar = new JComboBox<>(new String[] {
-                "Empleado",
-                "Cajero",
-                "Manager",
-                "Administrador"
-        });
-
-        panelDatos.add(new JLabel("Contraseña:"));
-        panelDatos.add(txtContraAgregar);
-        panelDatos.add(new JLabel("Nombre:"));
-        panelDatos.add(txtNombreAgregar);
-        panelDatos.add(new JLabel("Apellido Paterno:"));
-        panelDatos.add(txtApPAgregar);
-        panelDatos.add(new JLabel("Apellido Materno:"));
-        panelDatos.add(txtApMAgregar);
-        panelDatos.add(new JLabel("Fecha de Contrato (YYYY-MM-DD):"));
-        panelDatos.add(txtFechaContratoAgregar);
-        panelDatos.add(new JLabel("Fecha de Nacimiento (YYYY-MM-DD):"));
-        panelDatos.add(txtFechaNacAgregar);
-        panelDatos.add(new JLabel("Código Postal:"));
-        panelDatos.add(txtCPAgregar);
-        panelDatos.add(new JLabel("RFC:"));
-        panelDatos.add(txtRFCAgregar);
-        panelDatos.add(new JLabel("Calle:"));
-        panelDatos.add(txtCalleAgregar);
-        panelDatos.add(new JLabel("Colonia:"));
-        panelDatos.add(txtColoniaAgregar);
-
-        panelDatos.add(new JLabel("Rol del Empleado:"));
-        panelDatos.add(comboRolAgregar);
+        panelDatos.add(new JLabel("Contraseña:")); panelDatos.add(txtContraAgregar);
+        panelDatos.add(new JLabel("Nombre:")); panelDatos.add(txtNombreAgregar);
+        panelDatos.add(new JLabel("Apellido Paterno:")); panelDatos.add(txtApPAgregar);
+        panelDatos.add(new JLabel("Apellido Materno:")); panelDatos.add(txtApMAgregar);
+        panelDatos.add(new JLabel("Fecha Contrato (YYYY-MM-DD):")); panelDatos.add(txtFechaContratoAgregar);
+        panelDatos.add(new JLabel("Fecha Nacimiento (YYYY-MM-DD):")); panelDatos.add(txtFechaNacAgregar);
+        panelDatos.add(new JLabel("Código Postal:")); panelDatos.add(txtCPAgregar);
+        panelDatos.add(new JLabel("RFC:")); panelDatos.add(txtRFCAgregar);
+        panelDatos.add(new JLabel("Calle:")); panelDatos.add(txtCalleAgregar);
+        panelDatos.add(new JLabel("Colonia:")); panelDatos.add(txtColoniaAgregar);
+        panelDatos.add(new JLabel("Rol:")); panelDatos.add(comboRolAgregar);
 
         panel.add(panelDatos, BorderLayout.CENTER);
-
         JButton btnAgregar = new JButton("Agregar Empleado");
+        btnAgregar.setBackground(cafeIntenso);
+        btnAgregar.setForeground(Color.WHITE);
         panel.add(btnAgregar, BorderLayout.SOUTH);
 
-        btnAgregar.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        btnAgregar.setForeground(Color.WHITE);
-        btnAgregar.setBackground(new Color(110, 70, 40));
-        btnAgregar.setFocusPainted(false);
-        btnAgregar.setBorder(BorderFactory.createEmptyBorder(8,15,8,15));
+        crudUsuario acciones = new crudUsuario(this);
+        btnAgregar.addActionListener(e -> { asignarCamposAgregar(); setRolSeleccionado(comboRolAgregar.getSelectedItem().toString()); acciones.agregarUsuario(conn); });
 
-        btnAgregar.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                btnAgregar.setBackground(new Color(140, 90, 55));
-            }
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                btnAgregar.setBackground(new Color(110, 70, 40));
-            }
-        });
-
-        crudUsuario funcionUsuario = new crudUsuario(this);
-
-        btnAgregar.addActionListener(e -> {
-            asignarCamposAgregar();
-            setRolSeleccionado(comboRolAgregar.getSelectedItem().toString());
-            funcionUsuario.agregarUsuario(conn);
-        });
         return panel;
     }
 
+    // ===========================================================
+    // PANEL ACTUALIZAR
+    // ===========================================================
     private JPanel crearPanelActualizar(Connection conn) {
         JPanel panel = new JPanel(new BorderLayout());
-        JPanel panelSuperior = new JPanel(new FlowLayout());
-        panelSuperior.add(new JLabel("ID Empleado a Actualizar:"));
+        panel.setBackground(cafeSuave);
+
+        JPanel panelSuperior = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
+        panelSuperior.setBackground(cafeClaro);
+        JLabel lblId = new JLabel("ID Empleado a Actualizar:");
+        lblId.setForeground(cafeOscuro);
         txtIdActualizar = new JTextField(10);
-        panelSuperior.add(txtIdActualizar);
-
-
-
+        txtIdActualizar.setBackground(blanco);
+        txtIdActualizar.setForeground(cafeOscuro);
         JButton btnBuscar = new JButton("Buscar");
+        btnBuscar.setBackground(cafeIntenso);
+        btnBuscar.setForeground(Color.WHITE);
+        panelSuperior.add(lblId);
+        panelSuperior.add(txtIdActualizar);
         panelSuperior.add(btnBuscar);
         panel.add(panelSuperior, BorderLayout.NORTH);
 
-        JPanel panelDatos = new JPanel(new GridLayout(10, 2, 5, 5));
-        panelDatos.setBorder(BorderFactory.createTitledBorder("Actualizar Información"));
-
-        panel.setBackground(new Color(245, 235, 220));
-        panelSuperior.setBackground(new Color(240, 225, 205));
-        panelDatos.setBackground(new Color(255, 245, 230));
-
-        panelDatos.setBorder(BorderFactory.createTitledBorder(
-                BorderFactory.createLineBorder(new Color(150, 110, 80), 2, true),
-                "Actualizar Información",
-                0, 0,
-                new Font("Segoe UI", Font.BOLD, 14),
-                new Color(90, 55, 30)
-        ));
-
-        for (Component comp : panelDatos.getComponents()) {
-            if (comp instanceof JLabel)
-                comp.setForeground(new Color(90, 55, 30));
-
-            if (comp instanceof JTextField || comp instanceof JPasswordField)
-                comp.setBackground(new Color(255, 250, 240));
-        }
-
-        btnBuscar.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        btnBuscar.setForeground(Color.WHITE);
-        btnBuscar.setBackground(new Color(110, 70, 40));
-        btnBuscar.setFocusPainted(false);
-        btnBuscar.setBorder(BorderFactory.createEmptyBorder(8, 15, 8, 15));
-
-        btnBuscar.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                btnBuscar.setBackground(new Color(140, 90, 55));
-            }
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                btnBuscar.setBackground(new Color(110, 70, 40));
-            }
-        });
-
+        JPanel panelDatos = new JPanel(new GridBagLayout());
+        panelDatos.setBackground(cafeSuave);
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.gridx = 0; gbc.gridy = 0;
 
         txtContraActualizar = new JPasswordField();
         txtNombreActualizar = new JTextField();
@@ -402,200 +256,169 @@ public class crudUsuarioInterfaz extends JFrame {
         txtCalleActualizar = new JTextField();
         txtColoniaActualizar = new JTextField();
 
-        panelDatos.add(new JLabel("Contraseña:"));
-        panelDatos.add(txtContraActualizar);
-        panelDatos.add(new JLabel("Nombre:"));
-        panelDatos.add(txtNombreActualizar);
-        panelDatos.add(new JLabel("Apellido Paterno:"));
-        panelDatos.add(txtApPActualizar);
-        panelDatos.add(new JLabel("Apellido Materno:"));
-        panelDatos.add(txtApMActualizar);
-        panelDatos.add(new JLabel("Fecha de Contrato (YYYY-MM-DD):"));
-        panelDatos.add(txtFechaContratoActualizar);
-        panelDatos.add(new JLabel("Fecha de Nacimiento (YYYY-MM-DD):"));
-        panelDatos.add(txtFechaNacActualizar);
-        panelDatos.add(new JLabel("Código Postal:"));
-        panelDatos.add(txtCPActualizar);
-        panelDatos.add(new JLabel("RFC:"));
-        panelDatos.add(txtRFCActualizar);
-        panelDatos.add(new JLabel("Calle:"));
-        panelDatos.add(txtCalleActualizar);
-        panelDatos.add(new JLabel("Colonia:"));
-        panelDatos.add(txtColoniaActualizar);
+        JTextField[] camposActualizar = {txtNombreActualizar, txtApPActualizar, txtApMActualizar,
+                txtFechaContratoActualizar, txtFechaNacActualizar, txtCPActualizar, txtRFCActualizar,
+                txtCalleActualizar, txtColoniaActualizar};
+        for (JTextField txt : camposActualizar) {
+            txt.setBackground(blanco);
+            txt.setForeground(cafeOscuro);
+        }
+        txtContraActualizar.setBackground(blanco); txtContraActualizar.setForeground(cafeOscuro);
+
+        comboRolActualizar = new JComboBox<>();
+        crudUsuario func = new crudUsuario(this);
+        ArrayList<Object[]> roles = func.obtenerRoles(conn);
+        for (Object[] r : roles) comboRolActualizar.addItem((String) r[1]);
+
+        java.util.List<JComponent[]> listaCampos = java.util.List.of(
+                new JComponent[]{new JLabel("Contraseña:"), txtContraActualizar},
+                new JComponent[]{new JLabel("Nombre:"), txtNombreActualizar},
+                new JComponent[]{new JLabel("Apellido Paterno:"), txtApPActualizar},
+                new JComponent[]{new JLabel("Apellido Materno:"), txtApMActualizar},
+                new JComponent[]{new JLabel("Fecha Contrato (YYYY-MM-DD):"), txtFechaContratoActualizar},
+                new JComponent[]{new JLabel("Fecha Nacimiento (YYYY-MM-DD):"), txtFechaNacActualizar},
+                new JComponent[]{new JLabel("Código Postal:"), txtCPActualizar},
+                new JComponent[]{new JLabel("RFC:"), txtRFCActualizar},
+                new JComponent[]{new JLabel("Calle:"), txtCalleActualizar},
+                new JComponent[]{new JLabel("Colonia:"), txtColoniaActualizar},
+                new JComponent[]{new JLabel("Rol:"), comboRolActualizar}
+        );
+
+        for (JComponent[] c : listaCampos) {
+            gbc.gridx = 0; panelDatos.add(c[0], gbc);
+            gbc.gridx = 1; panelDatos.add(c[1], gbc);
+            gbc.gridy++;
+            if (c[0] instanceof JLabel) ((JLabel)c[0]).setForeground(cafeOscuro);
+        }
 
         panel.add(panelDatos, BorderLayout.CENTER);
 
         JButton btnActualizar = new JButton("Actualizar Empleado");
-        panel.add(btnActualizar, BorderLayout.SOUTH);
-
-        btnActualizar.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        btnActualizar.setBackground(cafeIntenso);
         btnActualizar.setForeground(Color.WHITE);
-        btnActualizar.setBackground(new Color(110, 70, 40));
-        btnActualizar.setFocusPainted(false);
-        btnActualizar.setBorder(BorderFactory.createEmptyBorder(8,15,8,15));
-
-        btnActualizar.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                btnActualizar.setBackground(new Color(140, 90, 55));
-            }
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                btnActualizar.setBackground(new Color(110, 70, 40));
-            }
-        });
-
+        JPanel panelBoton = new JPanel();
+        panelBoton.setBackground(cafeSuave);
+        panelBoton.add(btnActualizar);
+        panel.add(panelBoton, BorderLayout.SOUTH);
 
         crudUsuario acciones = new crudUsuario(this);
-
-        btnBuscar.addActionListener(e -> {
-            asignarCamposActualizar();
-            acciones.buscarUsuario(conn);
-        });
-
-        btnActualizar.addActionListener(e -> {
-            asignarCamposActualizar();
-            acciones.actualizarUsuario(conn, idUsuarioEnSesion);
-        });
+        btnBuscar.addActionListener(e -> { asignarCamposActualizar(); acciones.buscarUsuario(conn); });
+        btnActualizar.addActionListener(e -> { asignarCamposActualizar(); setRolSeleccionado(comboRolActualizar.getSelectedItem().toString()); acciones.actualizarUsuario(conn, idUsuarioEnSesion); });
 
         return panel;
     }
 
+    // ===========================================================
+    // PANEL PERMISOS
+    // ===========================================================
     private JPanel crearPanelPermisos(Connection conn) {
-        crudUsuario funcUsuarios = new crudUsuario(this);
-
         JPanel panel = new JPanel(new BorderLayout());
-        panel.setBorder(BorderFactory.createTitledBorder(
-                BorderFactory.createLineBorder(new Color(120, 80, 50), 2, true),
-                "Gestión de Permisos",
-                0, 0,
-                new Font("Segoe UI", Font.BOLD, 16),
-                new Color(90, 55, 30)
-        ));
-        panel.setBackground(new Color(240, 225, 205));
+        panel.setBackground(cafeSuave);
 
-        JPanel panelLista = new JPanel();
-        panelLista.setLayout(new BoxLayout(panelLista, BoxLayout.Y_AXIS));
-        panelLista.setBackground(new Color(240, 225, 205));
+        JTabbedPane pestañasPermisos = new JTabbedPane(JTabbedPane.TOP);
+        pestañasPermisos.setBackground(cafeIntenso);
 
-        JScrollPane scroll = new JScrollPane(panelLista);
-        scroll.setBorder(BorderFactory.createEmptyBorder());
-        scroll.getVerticalScrollBar().setUnitIncrement(16);
-        panel.add(scroll, BorderLayout.CENTER);
+        // --- Cambiar Rol de Usuarios ---
+        JPanel panelRoles = new JPanel();
+        panelRoles.setLayout(new BoxLayout(panelRoles, BoxLayout.Y_AXIS));
+        panelRoles.setBackground(cafeSuave);
 
+        crudUsuario funcUsuarios = new crudUsuario(this);
+        ArrayList<Object[]> usuarios = funcUsuarios.obtenerPermisosUsuarios(conn);
+        ArrayList<JComboBox<String>> combosUsuarios = new ArrayList<>();
+        for (Object[] u : usuarios) {
+            int idEmp = (int) u[0];
+            String nombreEmp = (String) u[1];
+            String rolActual = (String) u[2];
+
+            JPanel fila = new JPanel(new FlowLayout(FlowLayout.LEFT));
+            fila.setBackground(cafeSuave);
+            fila.setBorder(BorderFactory.createLineBorder(cafeIntenso));
+
+            JLabel lbl = new JLabel("ID: " + idEmp + " | " + nombreEmp);
+            lbl.setForeground(cafeOscuro);
+            fila.add(lbl);
+
+            JComboBox<String> comboRol = new JComboBox<>();
+            ArrayList<Object[]> roles = funcUsuarios.obtenerRoles(conn);
+            for (Object[] r : roles) comboRol.addItem((String) r[1]);
+            comboRol.setSelectedItem(rolActual);
+            combosUsuarios.add(comboRol);
+            fila.add(comboRol);
+
+            panelRoles.add(fila);
+        }
+
+        JButton btnGuardarRoles = new JButton("Guardar Cambios de Roles");
+        btnGuardarRoles.setBackground(cafeIntenso);
+        btnGuardarRoles.setForeground(Color.WHITE);
+        btnGuardarRoles.addActionListener(e -> {
+            for (int i = 0; i < usuarios.size(); i++) {
+                int idEmp = (int) usuarios.get(i)[0];
+                String nuevoRol = (String) combosUsuarios.get(i).getSelectedItem();
+                funcUsuarios.actualizarRolUsuario(conn, idEmp, nuevoRol);
+            }
+            JOptionPane.showMessageDialog(null, "Roles actualizados correctamente.");
+        });
+        panelRoles.add(btnGuardarRoles);
+
+        // --- Modificar permisos por rol ---
+        JPanel panelPermisosRol = new JPanel();
+        panelPermisosRol.setLayout(new BoxLayout(panelPermisosRol, BoxLayout.Y_AXIS));
+        panelPermisosRol.setBackground(cafeSuave);
+
+        ArrayList<Object[]> roles = funcUsuarios.obtenerRoles(conn);
         ArrayList<JCheckBox[]> listaChecks = new ArrayList<>();
+        for (Object[] r : roles) {
+            int idRol = (int) r[0];
+            String nombreRol = (String) r[1];
+            boolean venta = (boolean) r[2];
+            boolean inventario = (boolean) r[3];
+            boolean crud = (boolean) r[4];
+            boolean admin = (boolean) r[5];
 
-        // ===== MÉTODO PARA CARGAR USUARIOS =====
-        Runnable cargarUsuarios = () -> {
-            panelLista.removeAll();
-            listaChecks.clear();
+            JPanel fila = new JPanel(new FlowLayout(FlowLayout.LEFT));
+            fila.setBackground(cafeSuave);
+            fila.setBorder(BorderFactory.createLineBorder(cafeIntenso));
 
-            ArrayList<Object[]> listaUsuarios = funcUsuarios.obtenerPermisosUsuarios(conn);
+            JLabel lbl = new JLabel(nombreRol);
+            lbl.setForeground(cafeOscuro);
+            fila.add(lbl);
 
-            for (Object[] usuario : listaUsuarios) {
-                int idEmp = (int) usuario[0];
-                String nombreEmp = (String) usuario[1];
+            JCheckBox[] checks = new JCheckBox[4];
+            checks[0] = new JCheckBox("Venta", venta); checks[1] = new JCheckBox("Inventario", inventario);
+            checks[2] = new JCheckBox("CRUD", crud); checks[3] = new JCheckBox("Admin", admin);
+            for (JCheckBox cb : checks) { cb.setBackground(cafeSuave); cb.setForeground(cafeOscuro); fila.add(cb); }
+            listaChecks.add(checks);
 
-                boolean venta = (boolean) usuario[2];
-                boolean inventario = (boolean) usuario[3];
-                boolean crud = (boolean) usuario[4];
-                boolean admin = (boolean) usuario[5];
+            panelPermisosRol.add(fila);
+        }
 
-                JPanel fila = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 8));
-                fila.setBackground(new Color(255, 245, 230));
-                fila.setBorder(BorderFactory.createCompoundBorder(
-                        BorderFactory.createLineBorder(new Color(180, 150, 120)),
-                        BorderFactory.createEmptyBorder(10, 10, 10, 10)
-                ));
-
-                JLabel lblUsuario = new JLabel("ID: " + idEmp + "  |  " + nombreEmp);
-                lblUsuario.setFont(new Font("Segoe UI", Font.BOLD, 14));
-                lblUsuario.setForeground(new Color(90, 55, 30));
-                fila.add(lblUsuario);
-
-                JCheckBox chkVenta = new JCheckBox("Venta", venta);
-                JCheckBox chkInventario = new JCheckBox("Inventario", inventario);
-                JCheckBox chkCrud = new JCheckBox("CRUD", crud);
-                JCheckBox chkAdmin = new JCheckBox("Admin", admin);
-
-                JCheckBox[] conjuntoChecks = {chkVenta, chkInventario, chkCrud, chkAdmin};
-                listaChecks.add(conjuntoChecks);
-
-                for (JCheckBox c : conjuntoChecks) {
-                    c.setBackground(new Color(255, 245, 230));
-                    c.setForeground(new Color(110, 70, 40));
-                    fila.add(c);
-                }
-
-                fila.putClientProperty("id_emp", idEmp);
-
-                panelLista.add(fila);
-                panelLista.add(Box.createVerticalStrut(8));
+        JButton btnGuardarPermisos = new JButton("Guardar Permisos");
+        btnGuardarPermisos.setBackground(cafeIntenso);
+        btnGuardarPermisos.setForeground(Color.WHITE);
+        btnGuardarPermisos.addActionListener(e -> {
+            for (int i = 0; i < roles.size(); i++) {
+                int idRol = (int) roles.get(i)[0];
+                JCheckBox[] checks = listaChecks.get(i);
+                funcUsuarios.actualizarPermisosRol(conn, idRol,
+                        checks[0].isSelected(), checks[1].isSelected(), checks[2].isSelected(), checks[3].isSelected());
             }
-
-            panelLista.revalidate();
-            panelLista.repaint();
-        };
-
-        // Primera carga
-        cargarUsuarios.run();
-
-        // ===== BOTÓN GUARDAR CAMBIOS =====
-        JButton btnActualizar = new JButton("Guardar Cambios");
-        btnActualizar.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        btnActualizar.setForeground(Color.WHITE);
-        btnActualizar.setBackground(new Color(110, 70, 40));
-        btnActualizar.setFocusPainted(false);
-
-        btnActualizar.addActionListener(e -> {
-            for (int i = 0; i < panelLista.getComponentCount(); i += 2) {
-                JPanel fila = (JPanel) panelLista.getComponent(i);
-                int idEmp = (int) fila.getClientProperty("id_emp");
-
-                JCheckBox[] boxes = listaChecks.get(i / 2);
-
-                funcUsuarios.actualizarPermisos(
-                        conn,
-                        idEmp,
-                        boxes[0].isSelected(),
-                        boxes[1].isSelected(),
-                        boxes[2].isSelected(),
-                        boxes[3].isSelected()
-                );
-            }
-
-            JOptionPane.showMessageDialog(null,
-                    "Permisos actualizados correctamente.",
-                    "Éxito",
-                    JOptionPane.INFORMATION_MESSAGE
-            );
+            JOptionPane.showMessageDialog(null, "Permisos actualizados correctamente.");
         });
+        panelPermisosRol.add(btnGuardarPermisos);
 
-        // ===== BOTÓN REFRESCAR TABLA =====
-        JButton btnRefrescar = new JButton("Actualizar Lista");
-        btnRefrescar.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        btnRefrescar.setBackground(new Color(150, 100, 60));
-        btnRefrescar.setForeground(Color.WHITE);
-
-        btnRefrescar.addActionListener(e -> {
-            cargarUsuarios.run();
-
-        });
-
-        JPanel panelBotones = new JPanel();
-        panelBotones.setBackground(new Color(240, 225, 205));
-        panelBotones.add(btnActualizar);
-        panelBotones.add(btnRefrescar);
-
-        panel.add(panelBotones, BorderLayout.SOUTH);
+        pestañasPermisos.add("Roles de Usuarios", panelRoles);
+        pestañasPermisos.add("Permisos por Rol", panelPermisosRol);
+        panel.add(pestañasPermisos, BorderLayout.CENTER);
 
         return panel;
     }
 
-
-    //Da lugar a los campos q estan estaticos para que las pestañas no se pasen informacion y los metodos tomen de las
-    // mismos campos de texto ya matenmeeeeeeeeeeeeeeeeeeeeeeee
+    // ===========================================================
+    // ASIGNAR CAMPOS
+    // ===========================================================
     private void asignarCamposBusqueda() {
-        txtId = txtIdBuscar;
-        txtContra = txtContraBuscar;
         txtNombre = txtNombreBuscar;
         txtApP = txtApPBuscar;
         txtApM = txtApMBuscar;
@@ -605,10 +428,11 @@ public class crudUsuarioInterfaz extends JFrame {
         txtRFC = txtRFCBuscar;
         txtCalle = txtCalleBuscar;
         txtColonia = txtColoniaBuscar;
+        txtContra = txtContraBuscar;
+        txtId = txtIdBuscar;
     }
 
     private void asignarCamposAgregar() {
-        txtContra = txtContraAgregar;
         txtNombre = txtNombreAgregar;
         txtApP = txtApPAgregar;
         txtApM = txtApMAgregar;
@@ -618,11 +442,10 @@ public class crudUsuarioInterfaz extends JFrame {
         txtRFC = txtRFCAgregar;
         txtCalle = txtCalleAgregar;
         txtColonia = txtColoniaAgregar;
+        txtContra = txtContraAgregar;
     }
 
     private void asignarCamposActualizar() {
-        txtId = txtIdActualizar;
-        txtContra = txtContraActualizar;
         txtNombre = txtNombreActualizar;
         txtApP = txtApPActualizar;
         txtApM = txtApMActualizar;
@@ -632,8 +455,7 @@ public class crudUsuarioInterfaz extends JFrame {
         txtRFC = txtRFCActualizar;
         txtCalle = txtCalleActualizar;
         txtColonia = txtColoniaActualizar;
+        txtContra = txtContraActualizar;
+        txtId = txtIdActualizar;
     }
 }
-
-//Llevo dias haciendo namas este pedasoooooooa sdohasfoihasfihasfas
-//Agregar botones paa buscar por ciudad o asi q ya namas llame a unas funciones que cambien pero ya me canseeeeeeefirijoperiojaejioñ

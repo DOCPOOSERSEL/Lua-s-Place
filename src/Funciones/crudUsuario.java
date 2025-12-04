@@ -12,6 +12,7 @@ public class crudUsuario {
         this.vista = vista;
     }
 
+    // ------------------- BUSCAR -------------------
     public void buscarUsuario(Connection conn) {
         try {
             String sql = "SELECT * FROM empleado WHERE id_emp = ?";
@@ -20,8 +21,7 @@ public class crudUsuario {
             ResultSet rs = ps.executeQuery();
 
             if (rs.next()) {
-
-                vista.txtContra.setText("********"); // Contraseña oculta
+                vista.txtContra.setText("********");
                 vista.txtNombre.setText(rs.getString("nombre_emp"));
                 vista.txtApP.setText(rs.getString("apellidop_emp"));
                 vista.txtApM.setText(rs.getString("apellidom_emp"));
@@ -31,9 +31,7 @@ public class crudUsuario {
                 vista.txtRFC.setText(rs.getString("rfc_emp"));
                 vista.txtCalle.setText(rs.getString("calle_emp"));
                 vista.txtColonia.setText(rs.getString("col_emp"));
-
                 JOptionPane.showMessageDialog(null, "Empleado encontrado");
-
             } else {
                 JOptionPane.showMessageDialog(null, "No se encontró el empleado");
             }
@@ -43,23 +41,33 @@ public class crudUsuario {
         }
     }
 
-
+    // ------------------- AGREGAR -------------------
     public void agregarUsuario(Connection conn) {
         try {
-            // Cifrar la contraseña antes de insertarla
             String contraseñaPlano = new String(vista.txtContra.getPassword());
             String contraseñaCifrada = inicioDeSesion.cifrar(contraseñaPlano);
 
+            String rolSeleccionado = vista.getRolSeleccionado();
+
+            // Obtener id del rol desde permiso_emp
+            int idRol = -1;
+            String sqlRol = "SELECT id_pemp FROM permiso_emp WHERE nombre_rol = ?";
+            PreparedStatement psRol = conn.prepareStatement(sqlRol);
+            psRol.setString(1, rolSeleccionado);
+            ResultSet rsRol = psRol.executeQuery();
+            if (rsRol.next()) idRol = rsRol.getInt("id_pemp");
+            if (idRol == -1) throw new Exception("No se encontró el rol seleccionado");
+
             String sqlEmpleado = """
-        INSERT INTO empleado 
-        (contra_emp, nombre_emp, apellidop_emp, apellidom_emp, fecha_contrato, fecha_nac_emp,
-         cp_emp, rfc_emp, calle_emp, col_emp)
-        VALUES (?,?,?,?,?,?,?,?,?,?)
-        RETURNING id_emp
-        """;
+                INSERT INTO empleado
+                (contra_emp, nombre_emp, apellidop_emp, apellidom_emp, fecha_contrato, fecha_nac_emp,
+                 cp_emp, rfc_emp, calle_emp, col_emp, contrato_emp, rol_emp)
+                VALUES (?,?,?,?,?,?,?,?,?,?,TRUE,?)
+                RETURNING id_emp
+            """;
 
             PreparedStatement ps = conn.prepareStatement(sqlEmpleado);
-            ps.setString(1, contraseñaCifrada); // contraseña cifrada
+            ps.setString(1, contraseñaCifrada);
             ps.setString(2, vista.txtNombre.getText());
             ps.setString(3, vista.txtApP.getText());
             ps.setString(4, vista.txtApM.getText());
@@ -69,102 +77,42 @@ public class crudUsuario {
             ps.setString(8, vista.txtRFC.getText());
             ps.setString(9, vista.txtCalle.getText());
             ps.setString(10, vista.txtColonia.getText());
+            ps.setInt(11, idRol);
 
             ResultSet rs = ps.executeQuery();
             int nuevoId = -1;
-
-            if (rs.next()) {
-                nuevoId = rs.getInt("id_emp");
-            }
-            if (nuevoId == -1) {
-                throw new Exception("No se pudo obtener el ID del empleado.");
-            }
-
-            String rol = vista.getRolSeleccionado();
-
-            // Variables de permisos
-            boolean venta = false;
-            boolean inventario = false;
-            boolean crud = false;
-            boolean admin = false;
-
-            switch (rol) {
-                case "Empleado":
-                    venta = false;
-                    inventario = true;
-                    crud = false;
-                    admin = false;
-                    break;
-
-                case "Cajero":
-                    venta = true;
-                    inventario = false;
-                    crud = false;
-                    admin = false;
-                    break;
-
-                case "Manager":
-                    venta = true;
-                    inventario = true;
-                    crud = true;
-                    admin = true;
-                    break;
-
-                case "Administrador":
-                    venta = true;
-                    inventario = true;
-                    crud = true;
-                    admin = true;
-                    break;
-            }
-
-            String sqlPermiso = """
-        INSERT INTO permiso_emp(id_emp, venta_pemp, inventario_pemp, crud_pemp, admin_pemp)
-        VALUES (?,?,?,?,?)
-        """;
-
-            PreparedStatement psPermiso = conn.prepareStatement(sqlPermiso);
-            psPermiso.setInt(1, nuevoId);
-            psPermiso.setBoolean(2, venta);
-            psPermiso.setBoolean(3, inventario);
-            psPermiso.setBoolean(4, crud);
-            psPermiso.setBoolean(5, admin);
-
-            psPermiso.executeUpdate();
+            if (rs.next()) nuevoId = rs.getInt("id_emp");
 
             JOptionPane.showMessageDialog(null,
-                    "Empleado agregado con éxito.\nRol: " + rol + "\nID: " + nuevoId);
+                    "Empleado agregado con éxito.\nRol: " + rolSeleccionado + "\nID: " + nuevoId);
 
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Error al agregar: " + e.getMessage());
         }
     }
 
-
+    // ------------------- ACTUALIZAR -------------------
     public void actualizarUsuario(Connection conn, int idUsuarioSesion) {
         try {
             int idEmpleadoModificar = Integer.parseInt(vista.txtId.getText());
-
-            // Si no es superusuario, no puede modificar al superusuario
             if (idEmpleadoModificar == 1 && idUsuarioSesion != 1) {
-                JOptionPane.showMessageDialog(null,
-                        "No tienes permisos para modificar al super Usuario.");
+                JOptionPane.showMessageDialog(null, "No tienes permisos para modificar al super Usuario.");
                 return;
             }
 
-            // Cifrar la contraseña antes de actualizar
             String contraseñaPlano = new String(vista.txtContra.getPassword());
             String contraseñaCifrada = inicioDeSesion.cifrar(contraseñaPlano);
 
             String sql = """
-        UPDATE empleado SET 
-        contra_emp=?, nombre_emp=?, apellidop_emp=?, apellidom_emp=?, 
-        fecha_contrato=?, fecha_nac_emp=?, cp_emp=?, rfc_emp=?, 
-        calle_emp=?, col_emp=? WHERE id_emp=?
-        """;
+                UPDATE empleado SET 
+                contra_emp=?, nombre_emp=?, apellidop_emp=?, apellidom_emp=?, 
+                fecha_contrato=?, fecha_nac_emp=?, cp_emp=?, rfc_emp=?, 
+                calle_emp=?, col_emp=? 
+                WHERE id_emp=?
+            """;
 
             PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setString(1, contraseñaCifrada); // contraseña cifrada
+            ps.setString(1, contraseñaCifrada);
             ps.setString(2, vista.txtNombre.getText());
             ps.setString(3, vista.txtApP.getText());
             ps.setString(4, vista.txtApM.getText());
@@ -175,8 +123,8 @@ public class crudUsuario {
             ps.setString(9, vista.txtCalle.getText());
             ps.setString(10, vista.txtColonia.getText());
             ps.setInt(11, idEmpleadoModificar);
-            ps.executeUpdate();
 
+            ps.executeUpdate();
             JOptionPane.showMessageDialog(null, "Empleado actualizado exitosamente");
 
         } catch (Exception e) {
@@ -184,25 +132,19 @@ public class crudUsuario {
         }
     }
 
-
-
+    // ------------------- ELIMINAR -------------------
     public void eliminarUsuario(Connection conn, int idUsuarioSesion) {
         try {
             int idEmpleadoEliminar = Integer.parseInt(vista.txtId.getText());
-
-            // === CONTROL DE ADMIN ===
             if (idEmpleadoEliminar == 1 && idUsuarioSesion != 1) {
-                JOptionPane.showMessageDialog(null,
-                        "No tienes permisos para desactivar al administrador.");
+                JOptionPane.showMessageDialog(null, "No tienes permisos para desactivar al administrador.");
                 return;
             }
             if (idEmpleadoEliminar == 1 && idUsuarioSesion == 1) {
-                JOptionPane.showMessageDialog(null,
-                        "No puedes desactivar al super Usuario");
+                JOptionPane.showMessageDialog(null, "No puedes desactivar al super Usuario");
                 return;
             }
 
-            // ==== AHORA SOLO DESACTIVA ====
             String sql = "UPDATE empleado SET contrato_emp = FALSE WHERE id_emp = ?";
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setInt(1, idEmpleadoEliminar);
@@ -215,71 +157,109 @@ public class crudUsuario {
         }
     }
 
+    // ------------------- PERMISOS -------------------
 
-
-    public ArrayList<Object[]> obtenerPermisosUsuarios(Connection conn) {
-        ArrayList<Object[]> lista = new ArrayList<>();
-
-        String sql = """
-        SELECT e.id_emp, 
-               e.nombre_emp, 
-               e.apellidop_emp, 
-               e.apellidom_emp,
-               p.venta_pemp,
-               p.inventario_pemp,
-               p.crud_pemp,
-               p.admin_pemp
-        FROM empleado e
-        INNER JOIN permiso_emp p ON e.id_emp = p.id_emp
-        WHERE e.contrato_emp = TRUE   -- SOLO EMPLEADOS ACTIVOS
-        ORDER BY e.id_emp;
-    """;
-
-        try (Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-
+    // Devuelve lista de roles con sus permisos desde permiso_emp + permiso_detalle
+    public ArrayList<Object[]> obtenerRoles(Connection conn) {
+        ArrayList<Object[]> roles = new ArrayList<>();
+        try {
+            String sql = """
+                SELECT p.id_pemp, p.nombre_rol, d.venta_perm, d.inventario_perm, d.crud_perm, d.admin_perm
+                FROM permiso_emp p
+                LEFT JOIN permiso_detalle d ON p.id_pemp = d.id_pemp
+            """;
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
             while (rs.next()) {
-                lista.add(new Object[]{
-                        rs.getInt("id_emp"),
-                        rs.getString("nombre_emp") + " " +
-                                rs.getString("apellidop_emp") + " " +
-                                rs.getString("apellidom_emp"),
-                        rs.getBoolean("venta_pemp"),
-                        rs.getBoolean("inventario_pemp"),
-                        rs.getBoolean("crud_pemp"),
-                        rs.getBoolean("admin_pemp")
+                roles.add(new Object[]{
+                        rs.getInt("id_pemp"),
+                        rs.getString("nombre_rol"),
+                        rs.getBoolean("venta_perm"),
+                        rs.getBoolean("inventario_perm"),
+                        rs.getBoolean("crud_perm"),
+                        rs.getBoolean("admin_perm")
                 });
             }
-
         } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Error al obtener permisos: " + e.getMessage());
+            JOptionPane.showMessageDialog(null, "Error al obtener roles: " + e.getMessage());
         }
-
-        return lista;
+        return roles;
     }
 
-
-
-    public void actualizarPermisos(Connection conn, int idEmp, boolean venta, boolean inventario, boolean crud, boolean admin) {
-        String sql = """
-        UPDATE permiso_emp 
-        SET venta_pemp = ?, inventario_pemp = ?, crud_pemp = ?, admin_pemp = ?
-        WHERE id_emp = ?
-        """;
-
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setBoolean(1, venta);
-            ps.setBoolean(2, inventario);
-            ps.setBoolean(3, crud);
-            ps.setBoolean(4, admin);
-            ps.setInt(5, idEmp);
-
-            ps.executeUpdate();
+    // Devuelve lista de usuarios con su rol (id, nombreCompleto, rol)
+    public ArrayList<Object[]> obtenerPermisosUsuarios(Connection conn) {
+        ArrayList<Object[]> usuarios = new ArrayList<>();
+        try {
+            String sql = """
+                SELECT u.id_emp, u.nombre_emp, u.apellidop_emp, u.apellidom_emp, p.nombre_rol
+                FROM empleado u
+                LEFT JOIN permiso_emp p ON u.rol_emp = p.id_pemp
+            """;
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                usuarios.add(new Object[]{
+                        rs.getInt("id_emp"),
+                        rs.getString("nombre_emp") + " " + rs.getString("apellidop_emp") + " " + rs.getString("apellidom_emp"),
+                        rs.getString("nombre_rol")
+                });
+            }
         } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Error al actualizar permisos: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return usuarios;
+    }
+
+    // Actualiza rol de un usuario
+    public void actualizarRolUsuario(Connection conn, int idEmp, String nuevoRol) {
+        try {
+            String sqlIdRol = "SELECT id_pemp FROM permiso_emp WHERE nombre_rol=?";
+            PreparedStatement ps1 = conn.prepareStatement(sqlIdRol);
+            ps1.setString(1, nuevoRol);
+            ResultSet rs = ps1.executeQuery();
+            if (rs.next()) {
+                int idRol = rs.getInt("id_pemp");
+                String sqlUpdate = "UPDATE empleado SET rol_emp=? WHERE id_emp=?";
+                PreparedStatement ps2 = conn.prepareStatement(sqlUpdate);
+                ps2.setInt(1, idRol);
+                ps2.setInt(2, idEmp);
+                ps2.executeUpdate();
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
         }
     }
 
-
-
+    // Actualiza permisos de un rol
+    public void actualizarPermisosRol(Connection conn, int idRol, boolean venta, boolean inventario, boolean crud, boolean admin) {
+        try {
+            String sqlCheck = "SELECT id_det FROM permiso_detalle WHERE id_pemp=?";
+            PreparedStatement psCheck = conn.prepareStatement(sqlCheck);
+            psCheck.setInt(1, idRol);
+            ResultSet rsCheck = psCheck.executeQuery();
+            if (rsCheck.next()) {
+                // Actualizar
+                String sqlUpdate = "UPDATE permiso_detalle SET venta_perm=?, inventario_perm=?, crud_perm=?, admin_perm=? WHERE id_pemp=?";
+                PreparedStatement psUpdate = conn.prepareStatement(sqlUpdate);
+                psUpdate.setBoolean(1, venta);
+                psUpdate.setBoolean(2, inventario);
+                psUpdate.setBoolean(3, crud);
+                psUpdate.setBoolean(4, admin);
+                psUpdate.setInt(5, idRol);
+                psUpdate.executeUpdate();
+            } else {
+                // Insertar si no existe
+                String sqlInsert = "INSERT INTO permiso_detalle (id_pemp, venta_perm, inventario_perm, crud_perm, admin_perm) VALUES (?,?,?,?,?)";
+                PreparedStatement psInsert = conn.prepareStatement(sqlInsert);
+                psInsert.setInt(1, idRol);
+                psInsert.setBoolean(2, venta);
+                psInsert.setBoolean(3, inventario);
+                psInsert.setBoolean(4, crud);
+                psInsert.setBoolean(5, admin);
+                psInsert.executeUpdate();
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+    }
 }
